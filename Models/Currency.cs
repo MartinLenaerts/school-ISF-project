@@ -11,7 +11,7 @@ namespace Bank.Models
         [Key]
         public int Id { get; set; }
         public string Name { get; set; }
-        
+        [System.Text.Json.Serialization.JsonIgnore]
         public List<CurrencyClient> CurrencyClients { get; set; }
         
         public override string ToString()

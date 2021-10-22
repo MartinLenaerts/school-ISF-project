@@ -7,7 +7,8 @@ namespace Bank.Context
     {
         public List<Client> Clients { get; set; }
         public List<Currency> Currencies { get; set; }
-        public List<CurrencyClient> CurrenciesClient { get; set; }
+        public List<CurrencyClient> CurrenciesClients { get; set; }
+        public List<Transaction> Transactions { get; set; }
 
         public override string ToString()
         {
@@ -24,9 +25,15 @@ namespace Bank.Context
             }
 
             res += "\r\n";
-            foreach (var currencyClient in CurrenciesClient)
+            foreach (var currencyClient in CurrenciesClients)
             {
                 res += currencyClient + "\r\n";
+            }
+            
+            res += "\r\n";
+            foreach (var transaction in Transactions)
+            {
+                res += transaction + "\r\n";
             }
 
             return res;
