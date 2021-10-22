@@ -14,28 +14,60 @@ namespace Bank.Models
 
         public string Firstname { get; set; }
         public string Lastname { get; set; }
-
         public int Pin { get; set; }
 
+        private bool _blocked;
+        public bool Blocked
+        {
+            get { return _blocked; }
+            set
+            {
+                if (!value) Tries = 0;
+                _blocked = value;
+            }
+        }
+        private int _tries;
+
+        public int Tries
+        {
+            get { return _tries; }
+            set
+            {
+                _tries = value;
+                if (Tries == 3) _blocked = true;
+            }
+        }
+
+        [System.Text.Json.Serialization.JsonIgnore]
         public List<CurrencyClient> CurrencyClients { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public List<Transaction> TransactionsSender { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public List<Transaction> TransactionsReceiver { get; set; }
 
         public override string ToString()
         {
             int count = this.CurrencyClients == null ? -1 : this.CurrencyClients.Count;
-            return "Client n°" + this.Guid + " \r\n       Prenom : " + this.Firstname + " \r\n       Nom : " + this.Lastname + " \r\n       Nombre de devises : " + count + "\r\n";
+            return "Client n°" + this.Guid + " \r\n" +
+                   "       Firstname : " + Firstname + " \r\n" +
+                   "       LastName : " + Lastname + " \r\n" +
+                   "       isBlocked : " + Blocked + " \r\n" +
+                   "       Nombre de devises : " + count + "\r\n";
         }
 
-        public void merge(Client c)
+        public void Merge(Client c)
         {
             Firstname = c.Firstname == null ? Firstname : c.Firstname;
             Lastname = c.Lastname == null ? Lastname : c.Lastname;
             Pin = c.Pin == 0 ? Pin : c.Pin;
+            Blocked = c.Blocked;
+            Tries = c.Tries;
         }
 
         public override bool Equals(object? obj)
         {
             if (obj == null || !(obj is Client)) return false;
-            return Guid == ((Client)obj).Guid;
+            return Guid == ((Client) obj).Guid;
         }
     }
 }
