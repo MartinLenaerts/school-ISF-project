@@ -33,7 +33,7 @@ namespace Bank.Access
 
         public Client GetClient(int guid)
         {
-            return Context.Clients.FirstOrDefault(c => c.Guid == guid);
+            return Context.Clients.Include(c=>c.CurrencyClients).FirstOrDefault(c => c.Guid == guid);
         }
 
         public bool UpdateClient(Client c)

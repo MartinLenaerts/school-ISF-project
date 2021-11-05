@@ -113,7 +113,7 @@ namespace Bank.Access
         public List<Transaction> GetClientTransactions(int guid)
         {
             ClientJsonContext context = GetContext();
-            List<Transaction> t = context.Transactions.FindAll(t => t.ReceiverId == guid || t.SenderId == guid);
+            List<Transaction> t = context.Transactions.FindAll(t => t.Sender.Guid == guid || t.Receiver.Guid == guid);
             return t;
         }
 

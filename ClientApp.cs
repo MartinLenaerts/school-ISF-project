@@ -14,12 +14,20 @@ namespace Bank
         public Client Client { get; set; }
         public Storage Storage { get; set; }
 
+        public ClientApp(Storage storage)
+        {
+            Storage = storage;
+        }
+
         public bool Start()
         {
             BeginClient:
             try
             {
-                if (Client is null && !AskCredentials()) throw new Exception("\r\n Guid or pin incorrect");
+                if (Client is null && !AskCredentials())
+                {
+                    goto BeginClient;
+                }
                 PrintWelcomeMessage();
                 string key = Console.ReadLine();
                 switch (key)
@@ -98,10 +106,8 @@ namespace Bank
                         return false;
                     case "q": // Quit
                         return true;
-                        break;
                     case "Q": // Quit
                         return true;
-                        break;
                     default:
                         goto BeginClient;
                 }
@@ -125,9 +131,19 @@ namespace Bank
             int pin;
             if (!Int32.TryParse(stringGuid, out guid) || !Int32.TryParse(stringPin, out pin)) return false;
             Client client = Storage.DataAccess.GetClient(guid);
-            Console.Write("YES");
-            if (client is null || client.Pin != pin) return false;
-            Client = client;
+            if (client is null) return false;
+            if (client.Pin != pin)
+            {
+                client.Tries++;
+                Storage.DataAccess.UpdateClient(client);
+                return false;
+            }
+            else if (client.Blocked)
+            {
+                CustomConsole.PrintError(
+                    "Sorry, you are blocked , if you want to unblocked, please contact an admin ");
+                return true;
+            }
             return true;
         }
 
@@ -161,13 +177,6 @@ namespace Bank
             CustomConsole.PrintInfo(currencyClient.Amount + " " + currencyClient.Currency.Name);
             return true;
         }
-        
-        
-        
-
-
-
-
 
 
         public bool RetrieveMoney()

@@ -8,74 +8,78 @@ namespace Bank
     public class AdminApp
     {
         public Admin Admin { get; set; }
-        
+
         public Storage Storage { get; set; }
+
+        public AdminApp(Storage storage)
+        {
+            this.Storage = storage;
+        }
+
         public bool Start()
         {
-            PrintWelcomeMessage();
             AskAdminCredentials:
-                    if (!AskAdminCredentials()) // Ask Credentials
+            if (!AskAdminCredentials()) // Ask Credentials
+            {
+                CustomConsole.PrintError("\r\n Username ou password incorrect");
+                goto AskAdminCredentials;
+            }
+            Admin = new Admin();
+            BeginAdmin:
+            PrintWelcomeMessage();
+            string key = Console.ReadLine();
+            switch (key)
+            {
+                case "1": // Create Client
+                    createClient:
+                    if (!CreateClient())
                     {
-                        CustomConsole.PrintError("\r\n Username ou password incorrect");
-                        goto AskAdminCredentials;
+                        CustomConsole.PrintError("Une erreur s'est produite");
+                        goto createClient;
                     }
 
-                    Admin = new Admin();
-                    BeginAdmin:
-                    PrintWelcomeMessage();
-                    string key = Console.ReadLine();
-                    switch (key)
+                    CustomConsole.PrintSuccess("Client bien créé ! ");
+                    goto BeginAdmin;
+                case "2": // Manage Client
+                    if (!ManageClient())
                     {
-                        case "1": // Create Client
-                            createClient:
-                            if (!CreateClient())
-                            {
-                                CustomConsole.PrintError("Une erreur s'est produite");
-                                goto createClient;
-                            }
-
-                            CustomConsole.PrintSuccess("Client bien créé ! ");
-                            goto BeginAdmin;
-                        case "2": // Manage Client
-                            if (!ManageClient())
-                            {
-                                CustomConsole.PrintError("Une erreur s'est produite");
-                                goto BeginAdmin;
-                            }
-
-                            CustomConsole.PrintSuccess("Client modifié ! ");
-                            goto BeginAdmin;
-                        case "3": // Verify user transactions
-                            VerifyTransactions:
-                            if (!GetTransactions())
-                            {
-                                CustomConsole.PrintError("Une erreur s'est produite");
-                                goto VerifyTransactions;
-                            }
-
-                            goto BeginAdmin;
-                        case "4": // View all clients
-                            if (!ViewAllClients())
-                            {
-                                CustomConsole.PrintError("Une erreur s'est produite");
-                            }
-
-                            goto BeginAdmin;
-                        case "d": // Disconnect
-                            Admin = null;
-                            CustomConsole.PrintSuccess("Vous avez bien été déconnecté \r\n");
-                            return false;
-                        case "D": // Disconnect
-                            Admin = null;
-                            CustomConsole.PrintSuccess("Vous avez bien été déconnecté \r\n");
-                            return false;
-                        case "q": // Quit
-                            return true;
-                        case "Q": // Quit
-                           return true;
-                        default:
-                            goto BeginAdmin;
+                        CustomConsole.PrintError("Une erreur s'est produite");
+                        goto BeginAdmin;
                     }
+
+                    CustomConsole.PrintSuccess("Client modifié ! ");
+                    goto BeginAdmin;
+                case "3": // Verify user transactions
+                    VerifyTransactions:
+                    if (!GetTransactions())
+                    {
+                        CustomConsole.PrintError("Une erreur s'est produite");
+                        goto VerifyTransactions;
+                    }
+
+                    goto BeginAdmin;
+                case "4": // View all clients
+                    if (!ViewAllClients())
+                    {
+                        CustomConsole.PrintError("Une erreur s'est produite");
+                    }
+
+                    goto BeginAdmin;
+                case "d": // Disconnect
+                    Admin = null;
+                    CustomConsole.PrintSuccess("Vous avez bien été déconnecté \r\n");
+                    return false;
+                case "D": // Disconnect
+                    Admin = null;
+                    CustomConsole.PrintSuccess("Vous avez bien été déconnecté \r\n");
+                    return false;
+                case "q": // Quit
+                    return true;
+                case "Q": // Quit
+                    return true;
+                default:
+                    goto BeginAdmin;
+            }
         }
 
 
@@ -94,9 +98,8 @@ namespace Bank
             };
             CustomConsole.PrintAllChoices(choices);
         }
-        
-        
-        
+
+
         public bool AskAdminCredentials()
         {
             Console.Write("Veuillez entrer votre nom d'utilsateur : ");
@@ -107,12 +110,10 @@ namespace Bank
 
             return username == Admin.username && password == Admin.password;
         }
-        
-        
 
 
         public bool CreateClient()
-        {   
+        {
             if (Admin is null) return false;
             CustomConsole.Print("Veuillez entrer les informations du nouveau client : ");
             Console.Write("Nom : ");
@@ -169,7 +170,7 @@ namespace Bank
             switch (key)
             {
                 case "1":
-                    c.Blocked = false;
+                    c.unBlockedAndReset();
                     return Storage.DataAccess.UpdateClient(c);
                 case "2":
                     c.Blocked = true;
@@ -184,7 +185,6 @@ namespace Bank
                         Console.Write("Could you enter a correct pin please : ");
                         goto EnterPin;
                     }
-
                     c.Pin = pin;
                     return Storage.DataAccess.UpdateClient(c);
                 case "4":
@@ -222,6 +222,7 @@ namespace Bank
                         {
                             Console.WriteLine(transaction);
                         }
+                        if(transactions.Count == 0) CustomConsole.PrintInfo("No transaction");
 
                         return true;
                     }
@@ -280,7 +281,5 @@ namespace Bank
                 return false;
             }
         }
-        
-
     }
 }

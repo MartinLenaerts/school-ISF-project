@@ -51,11 +51,11 @@ namespace Bank
 
                 if (key == "1") // Is Admin
                 {
-                    stop = new AdminApp().Start();
+                    stop = new AdminApp(Storage).Start();
                 }
                 else if (key == "2") // Is Client
                 {
-                    stop = new ClientApp().Start();
+                    stop = new ClientApp(Storage).Start();
                 }
                 else if (key == "q" || key == "Q") // Quit
                 {
