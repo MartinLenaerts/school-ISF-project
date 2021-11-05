@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Bank.Context;
 using Bank.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bank.Access
 {
@@ -12,7 +13,7 @@ namespace Bank.Access
 
         public List<Client> GetAll()
         {
-            return Context.Clients.ToList();
+            return Context.Clients.Include(c => c.CurrencyClients).ToList();
         }
 
         public bool CreateClient(Client c)
@@ -32,7 +33,7 @@ namespace Bank.Access
 
         public Client GetClient(int guid)
         {
-            return Context.Clients.FirstOrDefault(c => c.Guid == guid);
+            return Context.Clients.Include(c=>c.CurrencyClients).FirstOrDefault(c => c.Guid == guid);
         }
 
         public bool UpdateClient(Client c)
@@ -69,7 +70,7 @@ namespace Bank.Access
 
         public List<Transaction> GetAllTransactions()
         {
-            return Context.Transactions.ToList();
+            return Context.Transactions.Include(tr=>tr.Receiver).Include(tr=>tr.Sender).ToList();
         }
 
         public List<Transaction> GetClientTransactions(int guid)

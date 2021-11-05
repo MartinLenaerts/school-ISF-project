@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 
 namespace Bank.Models
 {
@@ -17,15 +18,9 @@ namespace Bank.Models
         public int Pin { get; set; }
 
         private bool _blocked;
-        public bool Blocked
-        {
-            get { return _blocked; }
-            set
-            {
-                if (!value) Tries = 0;
-                _blocked = value;
-            }
-        }
+
+        public bool Blocked { get; set; }
+
         private int _tries;
 
         public int Tries
@@ -33,17 +28,18 @@ namespace Bank.Models
             get { return _tries; }
             set
             {
+                if (Tries >= 3)Blocked = true;
                 _tries = value;
-                if (Tries == 3) _blocked = true;
             }
         }
 
         [System.Text.Json.Serialization.JsonIgnore]
-        public List<CurrencyClient> CurrencyClients { get; set; }
-        [System.Text.Json.Serialization.JsonIgnore]
-        public List<Transaction> TransactionsSender { get; set; }
-        [System.Text.Json.Serialization.JsonIgnore]
-        public List<Transaction> TransactionsReceiver { get; set; }
+        public virtual ICollection<CurrencyClient> CurrencyClients { get; set; }
+
+        public Client()
+        {
+            this.CurrencyClients = new HashSet<CurrencyClient>();
+        }
 
         public override string ToString()
         {
@@ -52,7 +48,8 @@ namespace Bank.Models
                    "       Firstname : " + Firstname + " \r\n" +
                    "       LastName : " + Lastname + " \r\n" +
                    "       isBlocked : " + Blocked + " \r\n" +
-                   "       Nombre de devises : " + count + "\r\n";
+                   "       Tries : " + Tries + "\r\n" +
+                   "       Currency count : " + count + "\r\n";
         }
 
         public void Merge(Client c)
@@ -68,6 +65,12 @@ namespace Bank.Models
         {
             if (obj == null || !(obj is Client)) return false;
             return Guid == ((Client) obj).Guid;
+        }
+
+        public void unBlockedAndReset()
+        {
+            this._blocked = false;
+            this._tries = 0;
         }
     }
 }

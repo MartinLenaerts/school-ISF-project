@@ -9,8 +9,8 @@ namespace Bank.Context
     {
         public static void Seed(ClientDbContext context)
         {
-            //context.Database.EnsureDeleted();
-            //context.Database.EnsureCreated();
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
 
             Currency usdFromDb = new Currency() {Name = "USD"};
             Currency eurFromDb = new Currency() {Name = "EUR"};
@@ -31,12 +31,19 @@ namespace Bank.Context
             CurrencyClient a6 = new CurrencyClient() {Client = f1, Currency = usdFromDb, HasMain = true , Amount = 7864};
             CurrencyClient a7 = new CurrencyClient() {Client = f2, Currency = usdFromDb, HasMain = false , Amount = 21137};
             CurrencyClient a8 = new CurrencyClient() {Client = f3, Currency = usdFromDb, HasMain = true, Amount = 78624};
+
+
+            Transaction t1 = new Transaction() {Amount = 120, Receiver = a, Sender = f1};
+            Transaction t2 = new Transaction() {Amount = 23, Receiver = a, Sender = f2};
+            Transaction t3 = new Transaction() {Amount = 45, Receiver = f2, Sender = f3};
+            
+            context.Transactions.AddRange(new List<Transaction>(){t1,t2,t3});
             
             context.CurrenciesClients.AddRange(new List<CurrencyClient>() {a1,a2,a3,a4,a5,a6,a7,a8});
             
             context.Clients.AddRange(new List<Client>() {a, f1, f2, f3});
-
-
+            
+            
 
             context.SaveChanges();
         }
