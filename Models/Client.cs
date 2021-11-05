@@ -39,12 +39,22 @@ namespace Bank.Models
         }
 
         [System.Text.Json.Serialization.JsonIgnore]
-        public List<CurrencyClient> CurrencyClients { get; set; }
+        public virtual ICollection<CurrencyClient> CurrencyClients { get; set; }
+        
+        [NotMapped]
         [System.Text.Json.Serialization.JsonIgnore]
         public List<Transaction> TransactionsSender { get; set; }
+        [NotMapped]
         [System.Text.Json.Serialization.JsonIgnore]
         public List<Transaction> TransactionsReceiver { get; set; }
 
+        
+        
+
+        public Client()
+        {
+            this.CurrencyClients = new HashSet<CurrencyClient>();
+        }
         public override string ToString()
         {
             int count = this.CurrencyClients == null ? -1 : this.CurrencyClients.Count;

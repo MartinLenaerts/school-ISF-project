@@ -16,6 +16,14 @@ namespace Bank.Access
             get => dbJsonFile;
         }
 
+        public ClientJsonAccess()
+        {
+            if (!File.Exists(dbJsonFile))
+            {
+                File.Create(dbJsonFile);
+            }
+        }
+
         public ClientJsonContext GetContext()
         {
             string dbJson = new StreamReader(dbJsonFile).ReadToEnd();
@@ -187,14 +195,14 @@ namespace Bank.Access
         public CurrencyClient GetMainCurrencyClient(int guid)
         {
             ClientJsonContext context = GetContext();
-            CurrencyClient currencyClient = context.CurrenciesClients.Find(cc => cc.ClientId==guid && cc.HasMain);
+            CurrencyClient currencyClient = context.CurrenciesClients.Find(cc => cc.ClientId == guid && cc.HasMain);
             return currencyClient;
         }
 
         public List<CurrencyClient> GetCurrenciesClient(int guid)
         {
             ClientJsonContext context = GetContext();
-            List<CurrencyClient> currenciesClient = context.CurrenciesClients.FindAll(cc => cc.ClientId==guid);
+            List<CurrencyClient> currenciesClient = context.CurrenciesClients.FindAll(cc => cc.ClientId == guid);
             return currenciesClient;
         }
     }

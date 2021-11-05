@@ -9,8 +9,8 @@ namespace Bank.Context
     {
         public static void Seed(ClientDbContext context)
         {
-            //context.Database.EnsureDeleted();
-            //context.Database.EnsureCreated();
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
 
             Currency usdFromDb = new Currency() {Name = "USD"};
             Currency eurFromDb = new Currency() {Name = "EUR"};
