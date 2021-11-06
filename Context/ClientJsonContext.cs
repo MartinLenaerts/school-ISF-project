@@ -12,29 +12,17 @@ namespace Bank.Context
 
         public override string ToString()
         {
-            string res = "";
-            foreach (var client in Clients)
-            {
-                res += client + "\r\n";
-            }
+            var res = "";
+            foreach (var client in Clients) res += client + "\n";
 
-            res += "\r\n";
-            foreach (var currency in Currencies)
-            {
-                res += currency + "\r\n";
-            }
+            res += "\n";
+            foreach (var currency in Currencies) res += currency + "\n";
 
-            res += "\r\n";
-            foreach (var currencyClient in CurrenciesClients)
-            {
-                res += currencyClient + "\r\n";
-            }
-            
-            res += "\r\n";
-            foreach (var transaction in Transactions)
-            {
-                res += transaction + "\r\n";
-            }
+            res += "\n";
+            foreach (var currencyClient in CurrenciesClients) res += currencyClient + "\n";
+
+            res += "\n";
+            foreach (var transaction in Transactions) res += transaction + "\n";
 
             return res;
         }

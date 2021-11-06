@@ -1,19 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Bank.Context;
 using Bank.Models;
+using Bank.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bank.Access
 {
     public class ClientDbAccess : IClientDataAccess
     {
-        public static readonly ClientDbContext Context = new ClientDbContext();
+        public static readonly ClientDbContext Context = new();
+        public static readonly ClientApiAccess ApiAccess = new();
 
         public List<Client> GetAll()
         {
-            return Context.Clients.Include(c => c.CurrencyClients).ToList();
+            return Context.Clients.Include(c => c.CurrencyClients).ThenInclude(cc => cc.Currency).ToList();
         }
 
         public bool CreateClient(Client c)
@@ -33,14 +36,15 @@ namespace Bank.Access
 
         public Client GetClient(int guid)
         {
-            return Context.Clients.Include(c=>c.CurrencyClients).FirstOrDefault(c => c.Guid == guid);
+            return Context.Clients.Include(c => c.CurrencyClients).ThenInclude(cc => cc.Currency)
+                .FirstOrDefault(c => c.Guid == guid);
         }
 
         public bool UpdateClient(Client c)
         {
             try
             {
-                Client client = Context.Clients.FirstOrDefault(cl => cl.Guid == c.Guid);
+                var client = Context.Clients.FirstOrDefault(cl => cl.Guid == c.Guid);
                 client.Merge(c);
                 Context.SaveChanges();
                 return true;
@@ -70,7 +74,7 @@ namespace Bank.Access
 
         public List<Transaction> GetAllTransactions()
         {
-            return Context.Transactions.Include(tr=>tr.Receiver).Include(tr=>tr.Sender).ToList();
+            return Context.Transactions.Include(tr => tr.Receiver).Include(tr => tr.Sender).ToList();
         }
 
         public List<Transaction> GetClientTransactions(int guid)
@@ -142,17 +146,42 @@ namespace Bank.Access
             }
         }
 
-        public bool ExchangeCurrency(CurrencyClient sender, CurrencyClient receiver, double amount)
+        public async Task<bool> ExchangeCurrency(CurrencyClient sender, CurrencyClient receiver, double amount)
         {
             try
             {
-                CurrencyClient ccSender = Context.CurrenciesClients.First(c =>
-                    c.ClientId == sender.ClientId && c.CurrencyId == sender.CurrencyId);
-                CurrencyClient ccReceiver = Context.CurrenciesClients.First(c =>
-                    c.ClientId == receiver.ClientId && c.CurrencyId == receiver.CurrencyId);
+                CustomConsole.PrintSuccess("" + sender.Currency.Name + " ==> " + amount + " ==> " +
+                                           receiver.Currency.Name);
+                var rate = await ApiAccess.GetPair(sender.Currency.Name, receiver.Currency.Name);
+                if (sender.Amount < amount) return false;
+                sender.Amount -= amount;
+                receiver.Amount += amount * rate;
+                Context.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+                return false;
+            }
+        }
+
+        public async Task<bool> TransfertMoney(Client sender, Client receiver, double amount)
+        {
+            try
+            {
+
+                var ccSender = Context.CurrenciesClients.First(c =>
+                    c.ClientId == sender.Guid && c.HasMain);
+                var ccReceiver = Context.CurrenciesClients.First(c =>
+                    c.ClientId == receiver.Guid && c.HasMain);
+
+                double rate = 1;
+                if(!ccSender.Currency.Equals(ccReceiver.Currency)) rate = await ApiAccess.GetPair(ccSender.Currency.Name, ccReceiver.Currency.Name);
                 if (ccSender.Amount < amount) return false;
                 ccSender.Amount -= amount;
-                ccReceiver.Amount += amount;
+                ccReceiver.Amount += amount * rate;
                 Context.SaveChanges();
                 return true;
             }
@@ -162,6 +191,7 @@ namespace Bank.Access
                 return false;
             }
         }
+
 
         public CurrencyClient GetMainCurrencyClient(int guid)
         {

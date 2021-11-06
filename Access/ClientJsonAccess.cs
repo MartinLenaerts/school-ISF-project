@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Bank.Context;
 using Bank.Models;
 
@@ -9,47 +10,19 @@ namespace Bank.Access
 {
     public class ClientJsonAccess : IClientDataAccess
     {
-        private static string dbJsonFile = "database.json";
-
-        public static string DbJsonFile
-        {
-            get => dbJsonFile;
-        }
+        public static readonly ClientApiAccess ApiAccess = new();
 
         public ClientJsonAccess()
         {
-            if (!File.Exists(dbJsonFile))
-            {
-                File.Create(dbJsonFile);
-            }
+            if (!File.Exists(DbJsonFile)) File.Create(DbJsonFile);
         }
 
-        public ClientJsonContext GetContext()
-        {
-            string dbJson = new StreamReader(dbJsonFile).ReadToEnd();
-            ClientJsonContext json = JsonSerializer.Deserialize<ClientJsonContext>(dbJson);
-            return json;
-        }
-
-        private bool PushContext(ClientJsonContext context)
-        {
-            try
-            {
-                string jsonString = JsonSerializer.Serialize<ClientJsonContext>(context);
-                File.WriteAllText(dbJsonFile, jsonString);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
-        }
+        public static string DbJsonFile { get; } = "database.json";
 
 
         public List<Client> GetAll()
         {
-            ClientJsonContext context = GetContext();
+            var context = GetContext();
             return context != null ? context.Clients : new List<Client>();
         }
 
@@ -57,7 +30,7 @@ namespace Bank.Access
         {
             try
             {
-                ClientJsonContext context = GetContext();
+                var context = GetContext();
                 context.Clients.Add(c);
                 return PushContext(context);
             }
@@ -69,8 +42,8 @@ namespace Bank.Access
 
         public Client GetClient(int guid)
         {
-            ClientJsonContext context = GetContext();
-            Client c = context.Clients.Find(c => c.Guid == guid);
+            var context = GetContext();
+            var c = context.Clients.Find(c => c.Guid == guid);
             return c;
         }
 
@@ -78,8 +51,8 @@ namespace Bank.Access
         {
             try
             {
-                ClientJsonContext context = GetContext();
-                Client client = context.Clients.Find(client => client.Guid == c.Guid);
+                var context = GetContext();
+                var client = context.Clients.Find(client => client.Guid == c.Guid);
                 client.Merge(c);
                 return PushContext(context);
                 ;
@@ -94,8 +67,8 @@ namespace Bank.Access
         {
             try
             {
-                ClientJsonContext context = GetContext();
-                context.Clients.Remove(new Client() {Guid = guid});
+                var context = GetContext();
+                context.Clients.Remove(new Client {Guid = guid});
                 return PushContext(context);
             }
             catch (Exception e)
@@ -106,14 +79,14 @@ namespace Bank.Access
 
         public List<Transaction> GetAllTransactions()
         {
-            ClientJsonContext context = GetContext();
+            var context = GetContext();
             return context != null ? context.Transactions : new List<Transaction>();
         }
 
         public List<Transaction> GetClientTransactions(int guid)
         {
-            ClientJsonContext context = GetContext();
-            List<Transaction> t = context.Transactions.FindAll(t => t.Sender.Guid == guid || t.Receiver.Guid == guid);
+            var context = GetContext();
+            var t = context.Transactions.FindAll(t => t.Sender.Guid == guid || t.Receiver.Guid == guid);
             return t;
         }
 
@@ -121,7 +94,7 @@ namespace Bank.Access
         {
             try
             {
-                ClientJsonContext context = GetContext();
+                var context = GetContext();
                 context.Transactions.Add(transaction);
                 return PushContext(context);
             }
@@ -135,7 +108,7 @@ namespace Bank.Access
         {
             try
             {
-                ClientJsonContext context = GetContext();
+                var context = GetContext();
                 context.CurrenciesClients.Add(currencyClient);
                 return PushContext(context);
             }
@@ -149,7 +122,7 @@ namespace Bank.Access
         {
             try
             {
-                ClientJsonContext context = GetContext();
+                var context = GetContext();
                 context.CurrenciesClients.Remove(currencyClient);
                 return PushContext(context);
             }
@@ -163,8 +136,8 @@ namespace Bank.Access
         {
             try
             {
-                ClientJsonContext context = GetContext();
-                CurrencyClient cc = context.CurrenciesClients.Find(c => c == currencyClient);
+                var context = GetContext();
+                var cc = context.CurrenciesClients.Find(c => c == currencyClient);
                 cc.Merge(currencyClient);
                 return PushContext(context);
             }
@@ -174,16 +147,33 @@ namespace Bank.Access
             }
         }
 
-        public bool ExchangeCurrency(CurrencyClient sender, CurrencyClient receiver, double amount)
+        public async Task<bool> ExchangeCurrency(CurrencyClient sender, CurrencyClient receiver, double amount)
         {
             try
             {
-                ClientJsonContext context = GetContext();
-                CurrencyClient ccSender = context.CurrenciesClients.Find(c => c == sender);
-                CurrencyClient ccReceiver = context.CurrenciesClients.Find(c => c == receiver);
+                var rate = await ApiAccess.GetPair(sender.Currency.Name, receiver.Currency.Name);
+                var context = GetContext();
+                if (sender.Amount < amount) return false;
+                sender.Amount -= amount;
+                receiver.Amount += amount * amount;
+                return PushContext(context);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> TransfertMoney(Client sender, Client receiver, double amount)
+        {
+            try
+            {
+                var context = GetContext();
+                var ccSender = context.CurrenciesClients.Find(c => c == sender.CurrencyClients && c.HasMain);
+                var ccReceiver = context.CurrenciesClients.Find(c => c == receiver.CurrencyClients && c.HasMain);
                 if (ccSender.Amount < amount) return false;
                 ccSender.Amount -= amount;
-                ccSender.Amount += amount;
+                ccReceiver.Amount += amount;
                 return PushContext(context);
             }
             catch (Exception e)
@@ -194,16 +184,38 @@ namespace Bank.Access
 
         public CurrencyClient GetMainCurrencyClient(int guid)
         {
-            ClientJsonContext context = GetContext();
-            CurrencyClient currencyClient = context.CurrenciesClients.Find(cc => cc.ClientId == guid && cc.HasMain);
+            var context = GetContext();
+            var currencyClient = context.CurrenciesClients.Find(cc => cc.ClientId == guid && cc.HasMain);
             return currencyClient;
         }
 
         public List<CurrencyClient> GetCurrenciesClient(int guid)
         {
-            ClientJsonContext context = GetContext();
-            List<CurrencyClient> currenciesClient = context.CurrenciesClients.FindAll(cc => cc.ClientId == guid);
+            var context = GetContext();
+            var currenciesClient = context.CurrenciesClients.FindAll(cc => cc.ClientId == guid);
             return currenciesClient;
+        }
+
+        public ClientJsonContext GetContext()
+        {
+            var dbJson = new StreamReader(DbJsonFile).ReadToEnd();
+            var json = JsonSerializer.Deserialize<ClientJsonContext>(dbJson);
+            return json;
+        }
+
+        private bool PushContext(ClientJsonContext context)
+        {
+            try
+            {
+                var jsonString = JsonSerializer.Serialize(context);
+                File.WriteAllText(DbJsonFile, jsonString);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
         }
     }
 }
