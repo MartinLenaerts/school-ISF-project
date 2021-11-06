@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection.PortableExecutable;
 using Bank.Models;
 using Bank.Utils;
 
@@ -39,7 +40,6 @@ namespace Bank
                         goto createClient;
                     }
 
-                    CustomConsole.PrintSuccess("Client bien créé ! ");
                     goto BeginAdmin;
                 case "2": // Manage Client
                     if (!ManageClient())
@@ -83,7 +83,7 @@ namespace Bank
 
         public void PrintWelcomeMessage()
         {
-            CustomConsole.PrintInfo("Welcome Admin");
+            CustomConsole.PrintStyleInfo("Welcome Admin");
             CustomConsole.PrintInfo("Enter : ");
             var choices = new List<Choice>
             {
@@ -100,12 +100,13 @@ namespace Bank
 
         public bool AskAdminCredentials()
         {
-            Console.Write("Veuillez entrer votre nom d'utilsateur : ");
+            Console.Write("Please enter your username : ");
             var username = Console.ReadLine();
 
-            Console.Write("Veuillez entrer votre mot de passe : ");
+            Console.Write("Please enter your password : ");
             var password = CustomConsole.EnterPassword();
 
+            Console.WriteLine("");
             return username == Admin.username && password == Admin.password;
         }
 
@@ -113,20 +114,32 @@ namespace Bank
         public bool CreateClient()
         {
             if (Admin is null) return false;
-            CustomConsole.Print("Veuillez entrer les informations du nouveau client : ");
-            Console.Write("Nom : ");
+            CustomConsole.Print("Please enter the new client information : ");
+
+            Console.Write("LastName : ");
             var lastname = Console.ReadLine();
-            Console.Write("Prenom : ");
+
+            Console.Write("FirstName : ");
             var firstname = Console.ReadLine();
             if (lastname == "" || firstname == "") return false;
+
             var pin = new Random().Next(1000, 10000);
-            return Storage.DataAccess.CreateClient(new Client {Lastname = lastname, Firstname = firstname, Pin = pin});
+            Client newClient = new Client {Lastname = lastname, Firstname = firstname, Pin = pin};
+            bool res = Storage.DataAccess.CreateClient(newClient);
+            
+            if (res)
+            {
+                CustomConsole.PrintSuccess("Client has been created ! ");
+                CustomConsole.PrintStyleInfo("Please give this pin to the new client : " + newClient.Pin);
+            }
+
+            return res;
         }
 
         public bool ManageClient()
         {
             if (Admin is null) return false;
-            CustomConsole.Print("Veuillez entrer le guid d'un client : ");
+            CustomConsole.Print("Please enter a client guid : ");
             var guid = Console.ReadLine();
             if (guid == "") return false;
             try
@@ -156,12 +169,11 @@ namespace Bank
 
         public bool UpdateClient(Client c)
         {
-            CustomConsole.Print("Enter : ");
+            CustomConsole.Print("Tap : ");
             CustomConsole.Print("1 : to unblock");
             CustomConsole.Print("2 : to block");
             CustomConsole.Print("3 : to change pin");
             CustomConsole.Print("4 : to reset tries");
-            CustomConsole.Print("5 : to delete client");
             CustomConsole.Print("5 : to update client informations (firstname and lastname)");
             var key = Console.ReadLine();
             switch (key)
@@ -196,7 +208,7 @@ namespace Bank
                     var lastname = Console.ReadLine();
 
                     if (lastname != "") c.Lastname = lastname;
-                    if (firstname != "") c.Lastname = firstname;
+                    if (firstname != "") c.Firstname = firstname;
 
                     return Storage.DataAccess.UpdateClient(c);
                 default:
@@ -216,8 +228,10 @@ namespace Bank
                     try
                     {
                         var transactions = Storage.DataAccess.GetAllTransactions();
-                        foreach (var transaction in transactions) Console.WriteLine(transaction);
-                        if (transactions.Count == 0) CustomConsole.PrintInfo("No transaction");
+                        string msg = "";
+                        foreach (var transaction in transactions) msg += "" + transaction + "\n";
+                        if (transactions.Count == 0) msg = "No transaction";
+                        CustomConsole.PrintStyleInfo(msg);
 
                         return true;
                     }
@@ -260,8 +274,15 @@ namespace Bank
             try
             {
                 var clients = Storage.DataAccess.GetAll();
-                foreach (var client in clients) Console.WriteLine(client);
+                string header = "CLIENTS  NAMES : ";
+                string details = "DETAILS : \n\n";
+                foreach (var client in clients)
+                {
+                    header += client.Firstname + " " + client.Lastname + " , ";
+                    details += client;
+                }
 
+                CustomConsole.PrintStyleInfo(header.Remove(header.Length - 2) + "\n\n" + details);
                 return true;
             }
             catch (Exception e)

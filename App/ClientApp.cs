@@ -149,15 +149,15 @@ namespace Bank
             }
 
             Client = client;
-
+            Console.WriteLine("");
             wrongCredentials = false;
             return true;
         }
 
         public void PrintWelcomeMessage()
         {
-            CustomConsole.PrintInfo("Welcome Client");
-            CustomConsole.PrintInfo("Enter : ");
+            CustomConsole.PrintStyleInfo("Welcome Client");
+            CustomConsole.PrintInfo("Tap : ");
             CustomConsole.PrintAllChoices(new List<Choice>
             {
                 new() {Key = "1", Message = "to view GUID and credentials"},
@@ -234,14 +234,14 @@ namespace Bank
 
                 CustomConsole.Print("");
                 var cc = currenciesClient.ElementAt(currency);
-                EnterAmount:
-                Console.Write("Enter the amount : ");
+                TapAmount:
+                Console.Write("Tap the amount : ");
                 var stringAmount = Console.ReadLine();
                 double amount;
                 if (!double.TryParse(stringAmount, out amount) || amount < 1 || cc.Amount < amount)
                 {
                     Console.WriteLine("Wrong amount ! ");
-                    goto EnterAmount;
+                    goto TapAmount;
                 }
 
                 cc.Amount -= amount;
@@ -279,14 +279,14 @@ namespace Bank
 
                 CustomConsole.Print("");
                 var cc = currenciesClient.ElementAt(currency);
-                EnterAmount:
-                Console.Write("Enter the amount : ");
+                TapAmount:
+                Console.Write("Tap the amount : ");
                 var stringAmount = Console.ReadLine();
                 double amount;
                 if (!double.TryParse(stringAmount, out amount) || amount < 1)
                 {
                     Console.WriteLine("Wrong amount ! ");
-                    goto EnterAmount;
+                    goto TapAmount;
                 }
 
                 cc.Amount += amount;

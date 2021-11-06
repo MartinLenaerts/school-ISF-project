@@ -74,7 +74,7 @@ namespace Bank
 
         public void PrintWelcomeMessage()
         {
-            CustomConsole.PrintInfo("Welcome to The Bank");
+            CustomConsole.PrintStyleInfo("Welcome to The Bank");
             CustomConsole.PrintInfo("Enter : ");
             var choices = new List<Choice>
             {

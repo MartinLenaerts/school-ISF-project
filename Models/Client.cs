@@ -45,8 +45,10 @@ namespace Bank.Models
             string currencies = "";
             foreach (var currencyClient in CurrencyClients)
             {
-                currencies += "                   --"+currencyClient+ " \n";
+                currencies += "                   - "+currencyClient+ " \n";
             }
+
+            currencies = currencies == "" ? " no currency " : currencies;
             
             return "Client n°" + Guid + " \n" +
                    "       Firstname : " + Firstname + " \n" +

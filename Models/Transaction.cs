@@ -25,10 +25,10 @@ namespace Bank.Models
         public override string ToString()
         {
             return "Client n°" + Sender.Guid
-                               + "(" + Sender.Firstname + " " + Sender.Lastname + ") " +
+                               + " (" + Sender.Firstname + " " + Sender.Lastname + ") " +
                                "have send " + Amount + " to " +
                                "Client n°" + Receiver.Guid +
-                               "(" + Receiver.Firstname + " " + Receiver.Lastname + ") ";
+                               " (" + Receiver.Firstname + " " + Receiver.Lastname + ") ";
         }
     }
 }
