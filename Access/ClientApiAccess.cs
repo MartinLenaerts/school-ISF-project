@@ -9,15 +9,12 @@ namespace Bank.Access
     public class ClientApiAccess
     {
         private static readonly HttpClient Client = new();
-        private readonly string _apiKey = Environment.GetEnvironmentVariable("API_KEY");
+        private readonly string _apiKey = "67b16ecde47e2795a6213aea";
 
 
         private string GetUrl()
         {
-            Console.WriteLine("API KEY : " + _apiKey);
-            foreach (var VARIABLE in Environment.GetEnvironmentVariables()) Console.WriteLine("API KEY : " + VARIABLE);
-
-            return "https://v6.exchangerate-api.com/v6/67b16ecde47e2795a6213aea/";
+            return "https://v6.exchangerate-api.com/v6/"+_apiKey+"/";
         }
 
 
