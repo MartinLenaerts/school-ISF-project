@@ -75,8 +75,9 @@ namespace Bank.Utils
             }
 
             string res = new string('-', length + 6)+'\n' + msg  + new string('-', length + 6);
-
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(res);
+            Console.ResetColor();
         }
 
         public static string EnterPassword()

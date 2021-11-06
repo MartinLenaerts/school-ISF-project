@@ -21,10 +21,10 @@ namespace Bank.Context
             //Currency eurFromDb = context.Currencies.Where(c => c.Name == "EUR").First();
             //Currency usdFromDb = context.Currencies.Where(c => c.Name == "USD").First();
             var r = new Random();
-            var a = new Client {Firstname = "Nicolas", Lastname = "Sarkosy", Pin = r.Next(1000, 10000)};
-            var f1 = new Client {Firstname = "Francois", Lastname = "Hollande", Pin = r.Next(1000, 10000)};
-            var f2 = new Client {Firstname = "Jacques", Lastname = "Chirac", Pin = r.Next(1000, 10000)};
-            var f3 = new Client {Firstname = "Emmanuel", Lastname = "Macron", Pin = r.Next(1000, 10000)};
+            var a = new Client {Firstname = "Nicolas", Lastname = "Sarkosy", Pin = 1234};
+            var f1 = new Client {Firstname = "Francois", Lastname = "Hollande", Pin = 1234};
+            var f2 = new Client {Firstname = "Jacques", Lastname = "Chirac", Pin = 1234};
+            var f3 = new Client {Firstname = "Emmanuel", Lastname = "Macron", Pin = 1234};
 
             var a1 = new CurrencyClient {Client = a, Currency = eurFromDb, HasMain = true, Amount = 12000};
             var a2 = new CurrencyClient {Client = f1, Currency = eurFromDb, HasMain = false, Amount = 2453};
