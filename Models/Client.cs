@@ -1,14 +1,23 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
+using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace Bank.Models
 {
     [Table("Client")]
     public class Client
     {
+        private bool _blocked;
+
+        private int _tries;
+
+        public Client()
+        {
+            CurrencyClients = new HashSet<CurrencyClient>();
+        }
+
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Guid { get; set; }
@@ -17,39 +26,34 @@ namespace Bank.Models
         public string Lastname { get; set; }
         public int Pin { get; set; }
 
-        private bool _blocked;
-
         public bool Blocked { get; set; }
-
-        private int _tries;
 
         public int Tries
         {
-            get { return _tries; }
+            get => _tries;
             set
             {
-                if (Tries >= 3)Blocked = true;
+                if (Tries >= 3) Blocked = true;
                 _tries = value;
             }
         }
 
-        [System.Text.Json.Serialization.JsonIgnore]
-        public virtual ICollection<CurrencyClient> CurrencyClients { get; set; }
-
-        public Client()
-        {
-            this.CurrencyClients = new HashSet<CurrencyClient>();
-        }
+        [JsonIgnore] public virtual ICollection<CurrencyClient> CurrencyClients { get; set; }
 
         public override string ToString()
         {
-            int count = this.CurrencyClients == null ? -1 : this.CurrencyClients.Count;
-            return "Client n°" + this.Guid + " \r\n" +
-                   "       Firstname : " + Firstname + " \r\n" +
-                   "       LastName : " + Lastname + " \r\n" +
-                   "       isBlocked : " + Blocked + " \r\n" +
-                   "       Tries : " + Tries + "\r\n" +
-                   "       Currency count : " + count + "\r\n";
+            string currencies = "";
+            foreach (var currencyClient in CurrencyClients)
+            {
+                currencies += "                   --"+currencyClient+ " \n";
+            }
+            
+            return "Client n°" + Guid + " \n" +
+                   "       Firstname : " + Firstname + " \n" +
+                   "       LastName : " + Lastname + " \n" +
+                   "       isBlocked : " + Blocked + " \n" +
+                   "       Tries : " + Tries + "\n" +
+                   "       Currencies : \n" + currencies;
         }
 
         public void Merge(Client c)
@@ -69,8 +73,8 @@ namespace Bank.Models
 
         public void unBlockedAndReset()
         {
-            this._blocked = false;
-            this._tries = 0;
+            _blocked = false;
+            _tries = 0;
         }
     }
 }

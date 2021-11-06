@@ -7,27 +7,28 @@ namespace Bank
 {
     public class AdminApp
     {
+        public AdminApp(Storage storage)
+        {
+            Storage = storage;
+        }
+
         public Admin Admin { get; set; }
 
         public Storage Storage { get; set; }
-
-        public AdminApp(Storage storage)
-        {
-            this.Storage = storage;
-        }
 
         public bool Start()
         {
             AskAdminCredentials:
             if (!AskAdminCredentials()) // Ask Credentials
             {
-                CustomConsole.PrintError("\r\n Username ou password incorrect");
+                CustomConsole.PrintError("\n Username ou password incorrect");
                 goto AskAdminCredentials;
             }
+
             Admin = new Admin();
             BeginAdmin:
             PrintWelcomeMessage();
-            string key = Console.ReadLine();
+            var key = Console.ReadLine();
             switch (key)
             {
                 case "1": // Create Client
@@ -59,19 +60,16 @@ namespace Bank
 
                     goto BeginAdmin;
                 case "4": // View all clients
-                    if (!ViewAllClients())
-                    {
-                        CustomConsole.PrintError("Une erreur s'est produite");
-                    }
+                    if (!ViewAllClients()) CustomConsole.PrintError("Une erreur s'est produite");
 
                     goto BeginAdmin;
                 case "d": // Disconnect
                     Admin = null;
-                    CustomConsole.PrintSuccess("Vous avez bien été déconnecté \r\n");
+                    CustomConsole.PrintSuccess("Vous avez bien été déconnecté \n");
                     return false;
                 case "D": // Disconnect
                     Admin = null;
-                    CustomConsole.PrintSuccess("Vous avez bien été déconnecté \r\n");
+                    CustomConsole.PrintSuccess("Vous avez bien été déconnecté \n");
                     return false;
                 case "q": // Quit
                     return true;
@@ -87,14 +85,14 @@ namespace Bank
         {
             CustomConsole.PrintInfo("Welcome Admin");
             CustomConsole.PrintInfo("Enter : ");
-            List<Choice> choices = new List<Choice>()
+            var choices = new List<Choice>
             {
                 new() {Key = "1", Message = "to create a client"},
                 new() {Key = "2", Message = "to manage client"},
                 new() {Key = "3", Message = "to verify user transactions"},
                 new() {Key = "4", Message = "to view a list of all clients"},
                 new() {Key = "D", Message = "to disconnect"},
-                new() {Key = "Q", Message = "to quit"},
+                new() {Key = "Q", Message = "to quit"}
             };
             CustomConsole.PrintAllChoices(choices);
         }
@@ -103,10 +101,10 @@ namespace Bank
         public bool AskAdminCredentials()
         {
             Console.Write("Veuillez entrer votre nom d'utilsateur : ");
-            string username = Console.ReadLine();
+            var username = Console.ReadLine();
 
             Console.Write("Veuillez entrer votre mot de passe : ");
-            string password = CustomConsole.EnterPassword();
+            var password = CustomConsole.EnterPassword();
 
             return username == Admin.username && password == Admin.password;
         }
@@ -117,26 +115,25 @@ namespace Bank
             if (Admin is null) return false;
             CustomConsole.Print("Veuillez entrer les informations du nouveau client : ");
             Console.Write("Nom : ");
-            string lastname = Console.ReadLine();
+            var lastname = Console.ReadLine();
             Console.Write("Prenom : ");
-            string firstname = Console.ReadLine();
+            var firstname = Console.ReadLine();
             if (lastname == "" || firstname == "") return false;
-            int pin = new Random().Next(1000, 10000);
-            return Storage.DataAccess.CreateClient(new Client()
-                {Lastname = lastname, Firstname = firstname, Pin = pin});
+            var pin = new Random().Next(1000, 10000);
+            return Storage.DataAccess.CreateClient(new Client {Lastname = lastname, Firstname = firstname, Pin = pin});
         }
 
         public bool ManageClient()
         {
             if (Admin is null) return false;
             CustomConsole.Print("Veuillez entrer le guid d'un client : ");
-            string guid = Console.ReadLine();
+            var guid = Console.ReadLine();
             if (guid == "") return false;
             try
             {
-                Client client = Storage.DataAccess.GetClient(Int32.Parse(guid));
+                var client = Storage.DataAccess.GetClient(int.Parse(guid));
                 PrintManageClientMessage(client);
-                string key = Console.ReadLine();
+                var key = Console.ReadLine();
                 if (key == "1") return Storage.DataAccess.DeleteClient(client.Guid);
                 if (key == "2") return UpdateClient(client);
                 return false;
@@ -166,7 +163,7 @@ namespace Bank
             CustomConsole.Print("4 : to reset tries");
             CustomConsole.Print("5 : to delete client");
             CustomConsole.Print("5 : to update client informations (firstname and lastname)");
-            string key = Console.ReadLine();
+            var key = Console.ReadLine();
             switch (key)
             {
                 case "1":
@@ -178,13 +175,14 @@ namespace Bank
                 case "3":
                     EnterPin:
                     Console.Write("Could you enter the new pin please : ");
-                    string stringPin = Console.ReadLine();
+                    var stringPin = Console.ReadLine();
                     int pin;
-                    if (!Int32.TryParse(stringPin, out pin) || pin > 9999 || pin < 1000)
+                    if (!int.TryParse(stringPin, out pin) || pin > 9999 || pin < 1000)
                     {
                         Console.Write("Could you enter a correct pin please : ");
                         goto EnterPin;
                     }
+
                     c.Pin = pin;
                     return Storage.DataAccess.UpdateClient(c);
                 case "4":
@@ -192,10 +190,10 @@ namespace Bank
                 case "5":
                     CustomConsole.Print("You can update client informations (if you don't want please press Enter ) ");
                     Console.Write("Firstname : ");
-                    string firstname = Console.ReadLine();
+                    var firstname = Console.ReadLine();
 
                     Console.Write("Lastname : ");
-                    string lastname = Console.ReadLine();
+                    var lastname = Console.ReadLine();
 
                     if (lastname != "") c.Lastname = lastname;
                     if (firstname != "") c.Lastname = firstname;
@@ -211,18 +209,15 @@ namespace Bank
             CustomConsole.Print("Enter : ");
             CustomConsole.Print("1 : to show all transactions");
             CustomConsole.Print("2 : to show transactions of one client");
-            string key = Console.ReadLine();
+            var key = Console.ReadLine();
             switch (key)
             {
                 case "1":
                     try
                     {
-                        List<Transaction> transactions = Storage.DataAccess.GetAllTransactions();
-                        foreach (var transaction in transactions)
-                        {
-                            Console.WriteLine(transaction);
-                        }
-                        if(transactions.Count == 0) CustomConsole.PrintInfo("No transaction");
+                        var transactions = Storage.DataAccess.GetAllTransactions();
+                        foreach (var transaction in transactions) Console.WriteLine(transaction);
+                        if (transactions.Count == 0) CustomConsole.PrintInfo("No transaction");
 
                         return true;
                     }
@@ -235,9 +230,9 @@ namespace Bank
                 case "2":
                     EnterGuid:
                     Console.Write("Could you enter the guid of client : ");
-                    string stringGuid = Console.ReadLine();
+                    var stringGuid = Console.ReadLine();
                     int guid;
-                    if (!Int32.TryParse(stringGuid, out guid))
+                    if (!int.TryParse(stringGuid, out guid))
                     {
                         Console.Write("Could you enter a correct pin please : ");
                         goto EnterGuid;
@@ -245,11 +240,8 @@ namespace Bank
 
                     try
                     {
-                        List<Transaction> transactions = Storage.DataAccess.GetClientTransactions(guid);
-                        foreach (var transaction in transactions)
-                        {
-                            Console.WriteLine(transaction);
-                        }
+                        var transactions = Storage.DataAccess.GetClientTransactions(guid);
+                        foreach (var transaction in transactions) Console.WriteLine(transaction);
 
                         return true;
                     }
@@ -267,11 +259,8 @@ namespace Bank
         {
             try
             {
-                List<Client> clients = Storage.DataAccess.GetAll();
-                foreach (var client in clients)
-                {
-                    Console.WriteLine(client);
-                }
+                var clients = Storage.DataAccess.GetAll();
+                foreach (var client in clients) Console.WriteLine(client);
 
                 return true;
             }

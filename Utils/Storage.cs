@@ -1,18 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Bank.Access;
 using Bank.Context;
-using Bank.Models;
 
 namespace Bank
 {
     public class Storage
     {
-        public IClientDataAccess DataAccess { get; set; }
-
         public Storage()
         {
             try
@@ -37,7 +33,6 @@ namespace Bank
         public Storage(bool forceJson)
         {
             if (forceJson)
-            {
                 try
                 {
                     DataAccess = new ClientJsonAccess();
@@ -47,9 +42,7 @@ namespace Bank
                     Console.WriteLine(exception);
                     throw;
                 }
-            }
             else
-            {
                 try
                 {
                     DataAccess = new ClientDbAccess();
@@ -67,8 +60,9 @@ namespace Bank
                         throw;
                     }
                 }
-            }
         }
+
+        public IClientDataAccess DataAccess { get; set; }
 
         public bool Synchronize()
         {
@@ -79,25 +73,24 @@ namespace Bank
                 {
                     Console.WriteLine("SQLite used ...");
                     Console.WriteLine("JSON update ...");
-                    ClientJsonContext context = new ClientJsonContext()
+                    var context = new ClientJsonContext
                     {
                         Clients = ClientDbAccess.Context.Clients.ToList(),
                         Currencies = ClientDbAccess.Context.Currencies.ToList(),
                         Transactions = ClientDbAccess.Context.Transactions.ToList(),
                         CurrenciesClients = ClientDbAccess.Context.CurrenciesClients.ToList()
                     };
-                    Console.WriteLine(context);
-                    string jsonString = JsonSerializer.Serialize<ClientJsonContext>(context);
+                    var jsonString = JsonSerializer.Serialize(context);
                     File.WriteAllText(ClientJsonAccess.DbJsonFile, jsonString);
                 }
                 else if (DataAccess.GetType().Name == "ClientJsonAccess")
                 {
                     Console.WriteLine("JSON used ...");
                     Console.WriteLine("SQLite update ...");
-                    ClientDbContext context = new ClientDbContext();
+                    var context = new ClientDbContext();
                     context.Database.EnsureDeleted();
                     context.Database.EnsureCreated();
-                    ClientJsonContext actualContext = ((ClientJsonAccess) DataAccess).GetContext();
+                    var actualContext = ((ClientJsonAccess) DataAccess).GetContext();
                     context.Clients.AddRange(actualContext.Clients);
                     context.Currencies.AddRange(actualContext.Currencies);
                     context.Transactions.AddRange(actualContext.Transactions);

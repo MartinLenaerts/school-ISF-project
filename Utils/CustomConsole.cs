@@ -1,20 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
-using Microsoft.VisualBasic.FileIO;
+using System.Linq;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace Bank.Utils
 {
     public class CustomConsole
     {
-        
-        
         public static void Print(string msg, bool line = true)
         {
-            if(line)Console.WriteLine(msg);
+            if (line) Console.WriteLine(msg);
             else Console.Write(msg);
         }
-        
+
         public static void PrintSuccess(string msg)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -40,10 +38,7 @@ namespace Bank.Utils
 
         public static void PrintAllChoices(List<Choice> choices)
         {
-            foreach (Choice choice in choices)
-            {
-                PrintChoice(choice);
-            }
+            foreach (var choice in choices) PrintChoice(choice);
         }
 
         public static void PrintInfo(string msg, bool line = true)
@@ -53,21 +48,50 @@ namespace Bank.Utils
             else Console.Write(msg);
             Console.ResetColor();
         }
-        
-        
+
+        public static void PrintStyleInfo(string msg)
+        {
+            int returnIndex = msg.IndexOf('\n');
+            int length = 0;
+            if (returnIndex == -1)
+            {
+                length = msg.Length;
+                msg = "|  " + msg + "  |\n";
+            }
+            else
+            {
+                string[] lines = msg.Split('\n');
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string line = lines[i];
+                    if (line.Length > length) length = line.Length;
+                }
+
+                msg = "";
+                foreach (string line in lines)
+                {
+                    msg+= "|  " + line + new string(' ',length-line.Length) +"  |\n";
+                }
+            }
+
+            string res = new string('-', length + 6)+'\n' + msg  + new string('-', length + 6);
+
+            Console.WriteLine(res);
+        }
+
         public static string EnterPassword()
         {
             var pass = string.Empty;
             ConsoleKey key;
             do
             {
-                var keyInfo = Console.ReadKey(intercept: true);
+                var keyInfo = Console.ReadKey(true);
                 key = keyInfo.Key;
 
                 if (key == ConsoleKey.Backspace && pass.Length > 0)
                 {
                     Console.Write("\b \b");
-                    pass = pass[0..^1];
+                    pass = pass[..^1];
                 }
                 else if (!char.IsControl(keyInfo.KeyChar))
                 {

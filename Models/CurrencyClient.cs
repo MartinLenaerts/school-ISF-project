@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bank.Models
@@ -11,28 +11,28 @@ namespace Bank.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int CurrencyClientId { get; set; }
-        [ForeignKey("Currency"), Required]
-        public int CurrencyId { get; set; }
 
-        [System.Text.Json.Serialization.JsonIgnore]
-        public Currency Currency { get; set; }
+        [ForeignKey("Currency")] [Required] public int CurrencyId { get; set; }
 
-        [ForeignKey("Client"), Required]
-        public int ClientId { get; set; }
+        [JsonIgnore] public Currency Currency { get; set; }
 
-        [System.Text.Json.Serialization.JsonIgnore]
-        public Client Client { get; set; }
+        [ForeignKey("Client")] [Required] public int ClientId { get; set; }
+
+        [JsonIgnore] public Client Client { get; set; }
 
         public bool HasMain { get; set; }
 
         public double Amount { get; set; }
 
 
+        public string ToStringWithClient()
+        {
+            return "Client n°" + ClientId + " have " + Amount + " " + Currency.Name;
+        }
+        
         public override string ToString()
         {
-            return "[" + Client + "]  --- [" + Currency + "] \r\n" + "[" + CurrencyClientId + "] --> " + ClientId +
-                   ", " +
-                   CurrencyId + " ==> " + HasMain;
+            return  Amount + " " + Currency.Name;
         }
 
         public void Merge(CurrencyClient c)
@@ -44,7 +44,7 @@ namespace Bank.Models
         public override bool Equals(object? obj)
         {
             if (obj == null || !(obj is CurrencyClient)) return false;
-            CurrencyClient cc = ((CurrencyClient) obj);
+            var cc = (CurrencyClient) obj;
             return ClientId == cc.ClientId && ClientId == cc.ClientId;
         }
     }

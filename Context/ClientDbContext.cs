@@ -14,7 +14,7 @@ namespace Bank.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            string databasePath = $"{AppDomain.CurrentDomain.SetupInformation.ApplicationBase}database.db";
+            var databasePath = $"{AppDomain.CurrentDomain.SetupInformation.ApplicationBase}database.db";
             options.UseSqlite($"Data Source={databasePath}");
         }
     }
