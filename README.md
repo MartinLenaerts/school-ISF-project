@@ -85,3 +85,12 @@ password : ``` admin ```
 |                                                                                            |
 ----------------------------------------------------------------------------------------------
 ```
+
+
+## TODO 
+
+- [ ] Unblock client 
+- [ ] Handle error when client have not currency
+- [ ] Test add and retrieve money
+- [ ] Add message to admin
+- [ ] Change Pin

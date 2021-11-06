@@ -45,6 +45,7 @@ namespace Bank
             while (!stop)
             {
                 Begin:
+                Console.Clear();
                 PrintWelcomeMessage();
                 var key = Console.ReadLine();
                 Console.WriteLine("");
@@ -74,6 +75,7 @@ namespace Bank
 
         public void PrintWelcomeMessage()
         {
+            
             CustomConsole.PrintStyleInfo("Welcome to The Bank");
             CustomConsole.PrintInfo("Enter : ");
             var choices = new List<Choice>

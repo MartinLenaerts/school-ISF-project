@@ -25,7 +25,7 @@ namespace Bank
                 CustomConsole.PrintError("\n Username ou password incorrect");
                 goto AskAdminCredentials;
             }
-
+            Console.Clear();
             Admin = new Admin();
             BeginAdmin:
             PrintWelcomeMessage();
@@ -83,6 +83,7 @@ namespace Bank
 
         public void PrintWelcomeMessage()
         {
+            Console.WriteLine("\n");
             CustomConsole.PrintStyleInfo("Welcome Admin");
             CustomConsole.PrintInfo("Enter : ");
             var choices = new List<Choice>
@@ -129,6 +130,7 @@ namespace Bank
             
             if (res)
             {
+                Console.Clear();
                 CustomConsole.PrintSuccess("Client has been created ! ");
                 CustomConsole.PrintStyleInfo("Please give this pin to the new client : " + newClient.Pin);
             }
@@ -139,7 +141,7 @@ namespace Bank
         public bool ManageClient()
         {
             if (Admin is null) return false;
-            CustomConsole.Print("Please enter a client guid : ");
+            CustomConsole.Print("Please enter a client guid : ",false);
             var guid = Console.ReadLine();
             if (guid == "") return false;
             try
@@ -161,20 +163,20 @@ namespace Bank
 
         public void PrintManageClientMessage(Client c)
         {
-            CustomConsole.Print("Client found ! : " + c);
+            CustomConsole.PrintStyleInfo("Client found ! : " + c);
             CustomConsole.Print("Enter : ");
-            CustomConsole.Print("1 : to delete");
-            CustomConsole.Print("2 : to update");
+            CustomConsole.PrintChoice(new Choice(){Key = "1", Message=" to delete"});
+            CustomConsole.PrintChoice(new Choice(){Key = "2", Message=" to update"});
         }
 
         public bool UpdateClient(Client c)
         {
             CustomConsole.Print("Tap : ");
-            CustomConsole.Print("1 : to unblock");
-            CustomConsole.Print("2 : to block");
-            CustomConsole.Print("3 : to change pin");
-            CustomConsole.Print("4 : to reset tries");
-            CustomConsole.Print("5 : to update client informations (firstname and lastname)");
+            CustomConsole.PrintChoice(new Choice(){Key="1",Message = "to unblock"});
+            CustomConsole.PrintChoice(new Choice(){Key="2",Message = "to block"});
+            CustomConsole.PrintChoice(new Choice(){Key="3",Message = "to change pin"});
+            CustomConsole.PrintChoice(new Choice(){Key="4",Message = "to reset tries"});
+            CustomConsole.PrintChoice(new Choice(){Key="5",Message = "to update client informations (firstname and lastname)"});
             var key = Console.ReadLine();
             switch (key)
             {

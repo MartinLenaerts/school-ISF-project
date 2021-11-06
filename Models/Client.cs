@@ -42,20 +42,20 @@ namespace Bank.Models
 
         public override string ToString()
         {
-            string currencies = "";
+            string currencies = "\n";
             foreach (var currencyClient in CurrencyClients)
             {
                 currencies += "                   - "+currencyClient+ " \n";
             }
 
-            currencies = currencies == "" ? " no currency " : currencies;
+            currencies = currencies == "\n" ? " no currency " : currencies;
             
             return "Client n°" + Guid + " \n" +
                    "       Firstname : " + Firstname + " \n" +
                    "       LastName : " + Lastname + " \n" +
                    "       isBlocked : " + Blocked + " \n" +
                    "       Tries : " + Tries + "\n" +
-                   "       Currencies : \n" + currencies;
+                   "       Currencies : " + currencies;
         }
 
         public void Merge(Client c)
