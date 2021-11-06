@@ -29,7 +29,6 @@ namespace Bank
                     if (wrongCredentials) CustomConsole.PrintError("\nWrong guid or pin");
                     goto BeginClient;
                 }
-
                 PrintWelcomeMessage();
                 var key = Console.ReadLine();
                 switch (key.ToLower())
@@ -120,10 +119,10 @@ namespace Bank
 
         public bool AskCredentials()
         {
-            Console.Write("Veuillez entrer votre guid : ");
+            Console.Write("Please enter your guid : ");
             var stringGuid = Console.ReadLine();
 
-            Console.Write("Veuillez entrer votre pin : ");
+            Console.Write("Please enter your pin : ");
             var stringPin = CustomConsole.EnterPassword();
 
             int guid;
@@ -156,13 +155,14 @@ namespace Bank
 
         public void PrintWelcomeMessage()
         {
+            Console.WriteLine("\n");
             CustomConsole.PrintStyleInfo("Welcome Client");
             CustomConsole.PrintInfo("Tap : ");
             CustomConsole.PrintAllChoices(new List<Choice>
             {
                 new() {Key = "1", Message = "to view GUID and credentials"},
                 new() {Key = "2", Message = "to view total amount in preferred currency"},
-                new() {Key = "3", Message = "to view total amount in preferred currency"},
+                new() {Key = "3", Message = "to view total of all amounts"},
                 new() {Key = "4", Message = "to retrieve money from currency"},
                 new() {Key = "5", Message = "to add money to currency"},
                 new() {Key = "6", Message = "to exchange between currencies"},
@@ -178,8 +178,8 @@ namespace Bank
             var currencyClient = Storage.DataAccess.GetMainCurrencyClient(Client.Guid);
             if (currencyClient == null)
             {
-                CustomConsole.Print("Aucune devise pour ce client");
-                return false;
+                CustomConsole.Print("No currency");
+                return true;
             }
 
             CustomConsole.PrintStyleInfo(currencyClient.Amount + " " + currencyClient.Currency.Name);
@@ -191,8 +191,8 @@ namespace Bank
             var currenciesClient = Storage.DataAccess.GetCurrenciesClient(Client.Guid);
             if (currenciesClient.Count == 0)
             {
-                CustomConsole.Print("Aucune devise pour ce client");
-                return false;
+                CustomConsole.Print("No currency");
+                return true;
             }
 
             
@@ -211,8 +211,8 @@ namespace Bank
                 var currenciesClient = Storage.DataAccess.GetCurrenciesClient(Client.Guid);
                 if (currenciesClient.Count == 0)
                 {
-                    CustomConsole.Print("Aucune devise pour ce client");
-                    return false;
+                    CustomConsole.PrintStyleInfo("No currency");
+                    return true;
                 }
 
                 ChooseCurrency:
@@ -260,6 +260,11 @@ namespace Bank
             try
             {
                 var currenciesClient = Storage.DataAccess.GetCurrenciesClient(Client.Guid);
+                if (currenciesClient.Count == 0)
+                {
+                    CustomConsole.PrintStyleInfo("No currency");
+                    return true;
+                }
                 ChooseCurrency:
                 Console.Write("Choose the currency : ");
                 var index = 1;
