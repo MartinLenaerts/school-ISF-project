@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Bank.Models;
 using Bank.Utils;
@@ -29,6 +31,7 @@ namespace Bank
                     if (wrongCredentials) CustomConsole.PrintError("\nWrong guid or pin");
                     goto BeginClient;
                 }
+
                 PrintWelcomeMessage();
                 var key = Console.ReadLine();
                 switch (key.ToLower())
@@ -99,6 +102,12 @@ namespace Bank
                             goto LeaveMsg;
                         }
 
+                        goto BeginClient; 
+                    case "10": // Show Pin
+                        if (!ShowPin())
+                        {
+                            CustomConsole.PrintError("\n An eroor occured");
+                        }
                         goto BeginClient;
                     case "d": // Disconnect
                         Client = null;
@@ -167,7 +176,9 @@ namespace Bank
                 new() {Key = "5", Message = "to add money to currency"},
                 new() {Key = "6", Message = "to exchange between currencies"},
                 new() {Key = "7", Message = "to transfer money to an another client"},
-                new() {Key = "8", Message = "to leave message for admin"},
+                new() {Key = "8", Message = "to change pin"},
+                new() {Key = "9", Message = "to leave message for admin"},
+                new() {Key = "10", Message = "to show your pin (only 5 seconds)"},
                 new() {Key = "D", Message = "to disconnect"},
                 new() {Key = "Q", Message = "to quit"}
             });
@@ -178,7 +189,7 @@ namespace Bank
             var currencyClient = Storage.DataAccess.GetMainCurrencyClient(Client.Guid);
             if (currencyClient == null)
             {
-                CustomConsole.Print("No currency");
+                CustomConsole.PrintStyleInfo("No currency");
                 return true;
             }
 
@@ -191,15 +202,15 @@ namespace Bank
             var currenciesClient = Storage.DataAccess.GetCurrenciesClient(Client.Guid);
             if (currenciesClient.Count == 0)
             {
-                CustomConsole.Print("No currency");
+                CustomConsole.PrintStyleInfo("No currency");
                 return true;
             }
 
-            
+
             string msg = "You have : \n";
             foreach (var currencyClient in currenciesClient)
                 msg += "     -- " + currencyClient.Amount + " " + currencyClient.Currency.Name + "\n";
-            
+
             CustomConsole.PrintStyleInfo(msg);
             return true;
         }
@@ -228,7 +239,7 @@ namespace Bank
                 int currency;
                 if (!int.TryParse(stringCurrency, out currency) || currency < 1 || currency > index)
                 {
-                    Console.WriteLine("Wrong key ! ");
+                    CustomConsole.PrintError("Wrong key ! ");
                     goto ChooseCurrency;
                 }
 
@@ -240,7 +251,7 @@ namespace Bank
                 double amount;
                 if (!double.TryParse(stringAmount, out amount) || amount < 1 || cc.Amount < amount)
                 {
-                    Console.WriteLine("Wrong amount ! ");
+                    CustomConsole.PrintError("Wrong amount ! ");
                     goto TapAmount;
                 }
 
@@ -265,6 +276,7 @@ namespace Bank
                     CustomConsole.PrintStyleInfo("No currency");
                     return true;
                 }
+
                 ChooseCurrency:
                 Console.Write("Choose the currency : ");
                 var index = 1;
@@ -290,7 +302,7 @@ namespace Bank
                 double amount;
                 if (!double.TryParse(stringAmount, out amount) || amount < 1)
                 {
-                    Console.WriteLine("Wrong amount ! ");
+                    CustomConsole.PrintError("Wrong amount ! ");
                     goto TapAmount;
                 }
 
@@ -300,7 +312,7 @@ namespace Bank
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                CustomConsole.PrintError(e.Message);
                 return false;
             }
         }
@@ -310,43 +322,47 @@ namespace Bank
             try
             {
                 ChooseCurrency:
-                var currenciesChoices = Choice.CreateChoices(Client.CurrencyClients);
-
+                List<Choice> currenciesChoices = Choice.CreateChoices(Client.CurrencyClients);
+                if (Client.CurrencyClients.Count == 0)
+                {
+                    CustomConsole.PrintStyleInfo("No currency");
+                    return true;
+                }
                 CustomConsole.Print("Select base currency : ");
                 CustomConsole.PrintAllChoices(currenciesChoices);
-                var currencyCount = Client.CurrencyClients.Count;
-                var stringBaseCurrency = Console.ReadLine();
+                int currencyCount = Client.CurrencyClients.Count;
+                string stringBaseCurrency = Console.ReadLine();
                 int baseIndex;
                 if (!int.TryParse(stringBaseCurrency, out baseIndex) || baseIndex < 1 ||
                     baseIndex > currencyCount)
                 {
-                    Console.WriteLine("Wrong key ! ");
+                    CustomConsole.PrintError("Wrong key ! ");
                     goto ChooseCurrency;
                 }
 
-                var baseCurrency = Client.CurrencyClients.ElementAt(baseIndex - 1);
+                CurrencyClient baseCurrency = Client.CurrencyClients.ElementAt(baseIndex - 1);
 
 
                 CustomConsole.Print("Select base currency : ");
                 CustomConsole.PrintAllChoices(currenciesChoices);
-                var stringTargetCurrency = Console.ReadLine();
+                string stringTargetCurrency = Console.ReadLine();
                 int targetIndex;
                 if (!int.TryParse(stringTargetCurrency, out targetIndex) || targetIndex < 1 ||
                     targetIndex > currencyCount)
                 {
-                    Console.WriteLine("Wrong key ! ");
+                    CustomConsole.PrintError("Wrong key ! ");
                     goto ChooseCurrency;
                 }
 
-                var targetCurrency = Client.CurrencyClients.ElementAt(targetIndex - 1);
+                CurrencyClient targetCurrency = Client.CurrencyClients.ElementAt(targetIndex - 1);
                 SelectAmount:
                 CustomConsole.PrintInfo("How much " + baseCurrency.Currency.Name + " do you want to exchange in " +
                                         targetCurrency.Currency.Name + " ? ");
-                var strAmount = Console.ReadLine();
+                string strAmount = Console.ReadLine();
                 int amount;
                 if (!int.TryParse(strAmount, out amount))
                 {
-                    Console.WriteLine("Wrong amount ! ");
+                    CustomConsole.PrintError("Wrong amount ! ");
                     goto SelectAmount;
                 }
 
@@ -363,6 +379,11 @@ namespace Bank
         public async Task<bool> TransfertMoney()
         {
             ChooseClient:
+            if (Client.CurrencyClients.Count == 0)
+            {
+                CustomConsole.PrintStyleInfo("No currency");
+                return true;
+            }
             CustomConsole.PrintInfo("Please choose client to transfert money : ");
             var clients = Storage.DataAccess.GetAll();
             clients.Remove(Client);
@@ -383,7 +404,7 @@ namespace Bank
                 CustomConsole.PrintError("Wrong amount ! ");
                 goto SelectAmount;
             }
-            
+
             return await Storage.DataAccess.TransfertMoney(Client, clients.Find(c => c.Guid == clientGuid), amount);
         }
 
@@ -395,6 +416,37 @@ namespace Bank
         public bool LeaveMsg()
         {
             throw new NotImplementedException();
+        }
+        
+        
+        public bool ShowPin()
+        {
+            try
+            {
+                
+                int secondsToWait = 5;
+                
+                int currentLineCursor = Console.CursorTop;
+                CustomConsole.PrintStyleInfo("Your pin : " + Client.Pin);
+                while (secondsToWait != 0)
+                {
+                    CustomConsole.PrintInfo(""+secondsToWait+" . ",false);
+                    Thread.Sleep(1000);
+                    secondsToWait--;
+                }
+                for (int i = -1; i < 3; i++)
+                {
+                    Console.SetCursorPosition(0, Console.CursorTop-i);
+                    Console.Write(new string(' ', Console.WindowWidth));
+                    Console.SetCursorPosition(0, currentLineCursor-1);
+                }
+                return true;
+            }
+            catch(Exception e)
+            {
+                CustomConsole.PrintError(e.Message);
+                return false;
+            }
         }
     }
 }

@@ -9,7 +9,6 @@ namespace Bank.Models
     [Table("Client")]
     public class Client
     {
-        private bool _blocked;
 
         private int _tries;
 
@@ -48,7 +47,7 @@ namespace Bank.Models
                 currencies += "                   - "+currencyClient+ " \n";
             }
 
-            currencies = currencies == "\n" ? " no currency " : currencies;
+            currencies = currencies == "\n" ? " no currency \n" : currencies;
             
             return "Client n°" + Guid + " \n" +
                    "       Firstname : " + Firstname + " \n" +
@@ -75,8 +74,8 @@ namespace Bank.Models
 
         public void unBlockedAndReset()
         {
-            _blocked = false;
-            _tries = 0;
+            Blocked = false;
+            Tries = 0;
         }
     }
 }
