@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Bank.Context;
 using Bank.Models;
+using Bank.Utils;
 
 namespace Bank.Access
 {
@@ -22,9 +24,19 @@ namespace Bank.Access
 
         public List<Client> GetAll()
         {
-            var context = GetContext();
-            return context != null ? context.Clients : new List<Client>();
+            try
+            {
+                var context = GetContext();
+                if (context != null) return AddCurrenciesToClients(context.Clients, context);
+                else return new List<Client>();
+            }
+            catch (Exception e)
+            {
+                CustomConsole.PrintError(e.Message);
+                throw;
+            }
         }
+
 
         public bool CreateClient(Client c)
         {
@@ -43,7 +55,7 @@ namespace Bank.Access
         public Client GetClient(int guid)
         {
             var context = GetContext();
-            var c = context.Clients.Find(c => c.Guid == guid);
+            var c = AddCurrenciesToClient(context.Clients.Find(c => c.Guid == guid), context);
             return c;
         }
 
@@ -79,15 +91,24 @@ namespace Bank.Access
 
         public List<Transaction> GetAllTransactions()
         {
-            var context = GetContext();
-            return context != null ? context.Transactions : new List<Transaction>();
+            try
+            {
+                var context = GetContext();
+                if (context != null) return AddClientToTransactions(context.Transactions, context);
+                else return new List<Transaction>();
+            }
+            catch (Exception e)
+            {
+                CustomConsole.PrintError(e.Message);
+                throw;
+            }
         }
 
         public List<Transaction> GetClientTransactions(int guid)
         {
             var context = GetContext();
-            var t = context.Transactions.FindAll(t => t.Sender.Guid == guid || t.Receiver.Guid == guid);
-            return t;
+            return AddClientToTransactions(
+                context.Transactions.FindAll(t => t.Sender.Guid == guid || t.Receiver.Guid == guid), context);
         }
 
         public bool AddTransaction(Transaction transaction)
@@ -185,14 +206,17 @@ namespace Bank.Access
         public CurrencyClient GetMainCurrencyClient(int guid)
         {
             var context = GetContext();
-            var currencyClient = context.CurrenciesClients.Find(cc => cc.ClientId == guid && cc.HasMain);
+            var currencyClient =
+                AddCurrencyToCurrenciesClient(context.CurrenciesClients.Find(cc => cc.ClientId == guid && cc.HasMain),
+                    context);
             return currencyClient;
         }
 
         public List<CurrencyClient> GetCurrenciesClient(int guid)
         {
             var context = GetContext();
-            var currenciesClient = context.CurrenciesClients.FindAll(cc => cc.ClientId == guid);
+            var currenciesClient =
+                AddCurrencyToCurrenciesClients(context.CurrenciesClients.FindAll(cc => cc.ClientId == guid), context);
             return currenciesClient;
         }
 
@@ -216,6 +240,85 @@ namespace Bank.Access
                 Console.WriteLine(e);
                 return false;
             }
+        }
+
+
+        public int getLastId()
+        {
+            return GetContext().Clients.Last().Guid;
+        }
+
+        private List<Client> AddCurrenciesToClients(List<Client> clients, ClientJsonContext context)
+        {
+            List<Client> result = clients;
+            for (int i = 0; i < clients.Count; i++)
+            {
+                result[i] = AddCurrenciesToClient(result[i], context);
+            }
+
+            return result;
+        }
+
+
+        private Client AddCurrenciesToClient(Client client, ClientJsonContext context)
+        {
+            Client result = client;
+            foreach (CurrencyClient currencyClient in context.CurrenciesClients)
+            {
+                if (result.Guid == currencyClient.ClientId)
+                {
+                    if (result.CurrencyClients == null) result.CurrencyClients = new List<CurrencyClient>();
+                    result.CurrencyClients.Add(AddCurrencyToCurrenciesClient(currencyClient, context));
+                }
+            }
+
+            return result;
+        }
+
+        private CurrencyClient AddCurrencyToCurrenciesClient(CurrencyClient currencyClient, ClientJsonContext context)
+        {
+            CurrencyClient result = currencyClient;
+            foreach (Currency currency in context.Currencies)
+            {
+                if (result.CurrencyId == currency.Id) result.Currency = currency;
+            }
+
+            return result;
+        }
+
+        private List<CurrencyClient> AddCurrencyToCurrenciesClients(List<CurrencyClient> currencyClients,
+            ClientJsonContext context)
+        {
+            List<CurrencyClient> result = currencyClients;
+            for (int i = 0; i < currencyClients.Count; i++)
+            {
+                result[i] = AddCurrencyToCurrenciesClient(result[i], context);
+            }
+
+            return result;
+        }
+
+        private Transaction AddClientToTransaction(Transaction transaction, ClientJsonContext context)
+        {
+            Transaction result = transaction;
+            foreach (Client client in context.Clients)
+            {
+                if (result.ReceiverId == client.Guid) result.Receiver = client;
+                if (result.SenderId == client.Guid) result.Sender = client;
+            }
+
+            return result;
+        }
+
+        private List<Transaction> AddClientToTransactions(List<Transaction> transactions, ClientJsonContext context)
+        {
+            List<Transaction> result = transactions;
+            for (int i = 0; i < transactions.Count; i++)
+            {
+                result[i] = AddClientToTransaction(result[i], context);
+            }
+
+            return result;
         }
     }
 }

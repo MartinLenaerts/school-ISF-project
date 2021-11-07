@@ -132,7 +132,7 @@ namespace Bank
             {
                 Console.Clear();
                 CustomConsole.PrintSuccess("Client has been created ! ");
-                CustomConsole.PrintStyleInfo("Please give this pin to the new client : " + newClient.Pin);
+                CustomConsole.PrintStyleInfo("Please give this pin to the new client n° "+Storage.DataAccess.getLastId()+" : " + newClient.Pin);
             }
 
             return res;
@@ -281,7 +281,7 @@ namespace Bank
                 foreach (var client in clients)
                 {
                     header += client.Firstname + " " + client.Lastname + " , ";
-                    details += client;
+                    details += client+"\n";
                 }
 
                 CustomConsole.PrintStyleInfo(header.Remove(header.Length - 2) + "\n\n" + details);

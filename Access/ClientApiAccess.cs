@@ -9,7 +9,7 @@ namespace Bank.Access
     public class ClientApiAccess
     {
         private static readonly HttpClient Client = new();
-        private readonly string _apiKey = "67b16ecde47e2795a6213aea";
+        private readonly string _apiKey = Environment.GetEnvironmentVariable("API_KEY");
 
 
         private string GetUrl()

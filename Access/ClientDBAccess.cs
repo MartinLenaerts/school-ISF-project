@@ -202,5 +202,11 @@ namespace Bank.Access
         {
             return Context.CurrenciesClients.Where(cc => cc.ClientId == guid).ToList();
         }
+
+
+        public int getLastId()
+        {
+            return Context.Clients.OrderBy(c=>c.Guid).Last().Guid;
+        }
     }
 }

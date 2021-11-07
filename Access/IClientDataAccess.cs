@@ -26,5 +26,7 @@ namespace Bank.Access
 
         public CurrencyClient GetMainCurrencyClient(int guid);
         public List<CurrencyClient> GetCurrenciesClient(int guid);
+
+        public int getLastId();
     }
 }

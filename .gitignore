@@ -7,3 +7,4 @@ riderModule.iml
 .vs/
 .DS_Store
 Migrations/
+.env.local

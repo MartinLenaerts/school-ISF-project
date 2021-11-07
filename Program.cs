@@ -1,4 +1,6 @@
+using System.IO;
 using System.Threading.Tasks;
+using Bank.Utils;
 
 namespace Bank
 {
@@ -6,9 +8,7 @@ namespace Bank
     {
         private static async Task Main(string[] args)
         {
-            /*ClientContextSeeder.Seed(ClientDbAccess.Context);
-            Client client = new Storage().DataAccess.GetClient(1);
-            Console.WriteLine(client);*/
+            DotEnv.Load("../../../.env.local");
             var app = new App();
             await app.Start();
 
