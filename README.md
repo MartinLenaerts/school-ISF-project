@@ -3,7 +3,7 @@
 ## Table of contents
 - [Project desciption](#project-description)
 - [Project Setup](#project-setup)
-    - [Create MMigration](#create-migration)
+    - [Create Migration](#create-migration)
     - [Update database](#update-database)
     - [Create environnement variables](#create-environnment-variables)
     - [Run](#run)
@@ -11,7 +11,7 @@
 - [Important Information](#u-stylecolorredimportant-informations--u)
     - [To log into admin](#uto-log-into-the-admin-account-u)
     - [List of clients](#ulist-of-default-clients-u)
-- [To do](#todo)
+- [To do](#to-do)
 
 ___
 
