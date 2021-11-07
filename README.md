@@ -3,7 +3,11 @@
 ## Table of contents
 - [Project desciption](#project-description)
 - [Project Setup](#project-setup)
+<<<<<<< HEAD
     - [Create Migration](#create-migration)
+=======
+    - [Create MMigration](#create-migration)
+>>>>>>> 64d7a531aa021ab6559473b9bafdc103d219f467
     - [Update database](#update-database)
     - [Create environnement variables](#create-environnment-variables)
     - [Run](#run)
@@ -11,7 +15,11 @@
 - [Important Information](#u-stylecolorredimportant-informations--u)
     - [To log into admin](#uto-log-into-the-admin-account-u)
     - [List of clients](#ulist-of-default-clients-u)
+<<<<<<< HEAD
 - [To do](#to-do)
+=======
+- [To do](#todo)
+>>>>>>> 64d7a531aa021ab6559473b9bafdc103d219f467
 
 ___
 
