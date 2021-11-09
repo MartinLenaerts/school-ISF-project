@@ -209,12 +209,12 @@ namespace Bank.Access
         }
 
 
-        public int getLastId()
+        public int GetLastId()
         {
             return Context.Clients.OrderBy(c => c.Guid).Last().Guid;
         }
 
-        public List<Message> getMessages()
+        public List<Message> GetMessages()
         {
             return Context.Messages.OrderBy(c => c.Date).ToList();
         }

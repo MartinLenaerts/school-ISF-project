@@ -240,12 +240,12 @@ namespace Bank.Access
         }
 
 
-        public int getLastId()
+        public int GetLastId()
         {
             return GetContext().Clients.Last().Guid;
         }
 
-        public List<Message> getMessages()
+        public List<Message> GetMessages()
         {
             var context = GetContext();
             return context.Messages.OrderBy(c => c.Date).ToList();

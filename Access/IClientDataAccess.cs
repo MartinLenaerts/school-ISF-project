@@ -27,10 +27,10 @@ namespace Bank.Access
         public CurrencyClient GetMainCurrencyClient(int guid);
         public List<CurrencyClient> GetCurrenciesClient(int guid);
 
-        public int getLastId();
+        public int GetLastId();
         List<Currency> GetAllCurrencies();
 
-        public List<Message> getMessages();
+        public List<Message> GetMessages();
 
         public bool AddMessage(Message m);
     }

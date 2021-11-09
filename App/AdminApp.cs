@@ -133,7 +133,7 @@ namespace Bank
                 Console.Clear();
                 CustomConsole.PrintSuccess("Client has been created ! ");
                 CustomConsole.PrintStyleInfo("Please give this pin to the new client n° " +
-                                             Storage.DataAccess.getLastId() + " : " + newClient.Pin);
+                                             Storage.DataAccess.GetLastId() + " : " + newClient.Pin);
             }
 
             return res;
@@ -339,7 +339,7 @@ namespace Bank
         {
             try
             {
-                var messages = Storage.DataAccess.getMessages();
+                var messages = Storage.DataAccess.GetMessages();
                 var res = "";
                 foreach (var message in messages) res += message;
 
