@@ -103,12 +103,13 @@ namespace Bank
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Synchronization Error ! ");
                 Console.WriteLine(e.Message);
-
+                Console.ResetColor();
                 return false;
             }
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Synchronization Completed");
+            Console.ResetColor();
             return true;
         }
 
