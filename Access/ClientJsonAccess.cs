@@ -28,7 +28,7 @@ namespace Bank.Access
             {
                 var context = GetContext();
                 if (context != null) return AddCurrenciesToClients(context.Clients, context);
-                else return new List<Client>();
+                return new List<Client>();
             }
             catch (Exception e)
             {
@@ -72,6 +72,7 @@ namespace Bank.Access
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -86,6 +87,7 @@ namespace Bank.Access
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -96,7 +98,7 @@ namespace Bank.Access
             {
                 var context = GetContext();
                 if (context != null) return AddClientToTransactions(context.Transactions, context);
-                else return new List<Transaction>();
+                return new List<Transaction>();
             }
             catch (Exception e)
             {
@@ -122,6 +124,7 @@ namespace Bank.Access
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -136,6 +139,7 @@ namespace Bank.Access
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -150,6 +154,7 @@ namespace Bank.Access
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -165,6 +170,7 @@ namespace Bank.Access
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -182,6 +188,7 @@ namespace Bank.Access
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -193,13 +200,17 @@ namespace Bank.Access
                 var context = GetContext();
                 var ccSender = context.CurrenciesClients.Find(c => c == sender.CurrencyClients && c.HasMain);
                 var ccReceiver = context.CurrenciesClients.Find(c => c == receiver.CurrencyClients && c.HasMain);
+                double rate = 1;
+                if (!ccSender.Currency.Equals(ccReceiver.Currency))
+                    rate = await ApiAccess.GetPair(ccSender.Currency.Name, ccReceiver.Currency.Name);
                 if (ccSender.Amount < amount) return false;
                 ccSender.Amount -= amount;
-                ccReceiver.Amount += amount;
+                ccReceiver.Amount += amount * rate;
                 return PushContext(context);
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -220,12 +231,39 @@ namespace Bank.Access
                 AddCurrencyToCurrenciesClients(context.CurrenciesClients.FindAll(cc => cc.ClientId == guid), context);
             return currenciesClient;
         }
-        
+
         public List<Currency> GetAllCurrencies()
         {
             var context = GetContext();
             var currenciesClient = context.Currencies;
             return currenciesClient;
+        }
+
+
+        public int getLastId()
+        {
+            return GetContext().Clients.Last().Guid;
+        }
+
+        public List<Message> getMessages()
+        {
+            var context = GetContext();
+            return context.Messages.OrderBy(c => c.Date).ToList();
+        }
+
+        public bool AddMessage(Message m)
+        {
+            try
+            {
+                var context = GetContext();
+                context.Messages.Add(m);
+                return PushContext(context);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
         }
 
         public ClientJsonContext GetContext()
@@ -250,19 +288,10 @@ namespace Bank.Access
             }
         }
 
-
-        public int getLastId()
-        {
-            return GetContext().Clients.Last().Guid;
-        }
-
         private List<Client> AddCurrenciesToClients(List<Client> clients, ClientJsonContext context)
         {
-            List<Client> result = clients;
-            for (int i = 0; i < clients.Count; i++)
-            {
-                result[i] = AddCurrenciesToClient(result[i], context);
-            }
+            var result = clients;
+            for (var i = 0; i < clients.Count; i++) result[i] = AddCurrenciesToClient(result[i], context);
 
             return result;
         }
@@ -270,26 +299,23 @@ namespace Bank.Access
 
         private Client AddCurrenciesToClient(Client client, ClientJsonContext context)
         {
-            Client result = client;
-            foreach (CurrencyClient currencyClient in context.CurrenciesClients)
-            {
+            var result = client;
+            foreach (var currencyClient in context.CurrenciesClients)
                 if (result.Guid == currencyClient.ClientId)
                 {
                     if (result.CurrencyClients == null) result.CurrencyClients = new List<CurrencyClient>();
                     result.CurrencyClients.Add(AddCurrencyToCurrenciesClient(currencyClient, context));
                 }
-            }
 
             return result;
         }
 
         private CurrencyClient AddCurrencyToCurrenciesClient(CurrencyClient currencyClient, ClientJsonContext context)
         {
-            CurrencyClient result = currencyClient;
-            foreach (Currency currency in context.Currencies)
-            {
-                if (result.CurrencyId == currency.Id) result.Currency = currency;
-            }
+            var result = currencyClient;
+            foreach (var currency in context.Currencies)
+                if (result.CurrencyId == currency.Id)
+                    result.Currency = currency;
 
             return result;
         }
@@ -297,19 +323,17 @@ namespace Bank.Access
         private List<CurrencyClient> AddCurrencyToCurrenciesClients(List<CurrencyClient> currencyClients,
             ClientJsonContext context)
         {
-            List<CurrencyClient> result = currencyClients;
-            for (int i = 0; i < currencyClients.Count; i++)
-            {
+            var result = currencyClients;
+            for (var i = 0; i < currencyClients.Count; i++)
                 result[i] = AddCurrencyToCurrenciesClient(result[i], context);
-            }
 
             return result;
         }
 
         private Transaction AddClientToTransaction(Transaction transaction, ClientJsonContext context)
         {
-            Transaction result = transaction;
-            foreach (Client client in context.Clients)
+            var result = transaction;
+            foreach (var client in context.Clients)
             {
                 if (result.ReceiverId == client.Guid) result.Receiver = client;
                 if (result.SenderId == client.Guid) result.Sender = client;
@@ -320,34 +344,10 @@ namespace Bank.Access
 
         private List<Transaction> AddClientToTransactions(List<Transaction> transactions, ClientJsonContext context)
         {
-            List<Transaction> result = transactions;
-            for (int i = 0; i < transactions.Count; i++)
-            {
-                result[i] = AddClientToTransaction(result[i], context);
-            }
+            var result = transactions;
+            for (var i = 0; i < transactions.Count; i++) result[i] = AddClientToTransaction(result[i], context);
 
             return result;
-        }
-        
-        public List<Message> getMessages()
-        {
-            var context = GetContext();
-            return context.Messages.OrderBy(c=>c.Date).ToList();
-        }
-        
-        public bool AddMessage(Message m)
-        {
-            try
-            {
-                var context = GetContext();
-                context.Messages.Add(m);
-                return PushContext(context);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return false;
-            }
         }
     }
 }

@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Bank.Models;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace Bank.Utils
 {
@@ -52,8 +49,8 @@ namespace Bank.Utils
 
         public static void PrintStyleInfo(string msg)
         {
-            int returnIndex = msg.IndexOf('\n');
-            int length = 0;
+            var returnIndex = msg.IndexOf('\n');
+            var length = 0;
             if (returnIndex == -1)
             {
                 length = msg.Length;
@@ -61,21 +58,18 @@ namespace Bank.Utils
             }
             else
             {
-                string[] lines = msg.Split('\n');
-                for (int i = 0; i < lines.Length; i++)
+                var lines = msg.Split('\n');
+                for (var i = 0; i < lines.Length; i++)
                 {
-                    string line = lines[i];
+                    var line = lines[i];
                     if (line.Length > length) length = line.Length;
                 }
 
                 msg = "";
-                foreach (string line in lines)
-                {
-                    msg+= "|  " + line + new string(' ',length-line.Length) +"  |\n";
-                }
+                foreach (var line in lines) msg += "|  " + line + new string(' ', length - line.Length) + "  |\n";
             }
 
-            string res = new string('-', length + 6)+'\n' + msg  + new string('-', length + 6);
+            var res = new string('-', length + 6) + '\n' + msg + new string('-', length + 6);
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(res);
             Console.ResetColor();

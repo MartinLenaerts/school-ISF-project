@@ -11,6 +11,7 @@ namespace Bank.Context
         public List<Transaction> Transactions { get; set; }
 
         public List<Message> Messages { get; set; }
+
         public override string ToString()
         {
             var res = "";

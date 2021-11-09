@@ -6,6 +6,11 @@ namespace Bank.Models
 {
     public class Message
     {
+        public Message()
+        {
+            Date = DateTime.Now;
+        }
+
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
@@ -16,11 +21,6 @@ namespace Bank.Models
 
         public int ClientId { get; set; }
         public Client Client { get; set; }
-
-        public Message()
-        {
-            Date = DateTime.Now;
-        }
 
         public override string ToString()
         {

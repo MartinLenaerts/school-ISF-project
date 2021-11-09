@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Bank.Models;
@@ -109,10 +108,7 @@ namespace Bank
                         CustomConsole.PrintSuccess("Message sended ! ");
                         goto BeginClient;
                     case "10": // Show Pin
-                        if (!ShowPin())
-                        {
-                            CustomConsole.PrintError("\n An eroor occured");
-                        }
+                        if (!ShowPin()) CustomConsole.PrintError("\n An eroor occured");
 
                         goto BeginClient;
                     case "d": // Disconnect
@@ -213,7 +209,7 @@ namespace Bank
             }
 
 
-            string msg = "You have : \n";
+            var msg = "You have : \n";
             foreach (var currencyClient in currenciesClient)
                 msg += "     -- " + currencyClient.Amount + " " + currencyClient.Currency.Name + "\n";
 
@@ -232,7 +228,7 @@ namespace Bank
                     return true;
                 }
 
-                CurrencyClient currencyClient = ChooseCurrency(currenciesClient);
+                var currencyClient = ChooseCurrency(currenciesClient);
 
                 currencyClient.Amount -= ChooseAmount();
                 return Storage.DataAccess.UpdateCurrencyClient(currencyClient);
@@ -255,7 +251,7 @@ namespace Bank
                     return true;
                 }
 
-                CurrencyClient currency = ChooseCurrency(currenciesClient);
+                var currency = ChooseCurrency(currenciesClient);
 
 
                 Console.WriteLine("old :" + currency);
@@ -286,7 +282,7 @@ namespace Bank
                 goto ChooseCurrency;
             }
 
-            CurrencyClient currency = currenciesClient.Find(c => c.CurrencyClientId == currencyIndex);
+            var currency = currenciesClient.Find(c => c.CurrencyClientId == currencyIndex);
 
             CustomConsole.Print("");
             return currency;
@@ -313,7 +309,7 @@ namespace Bank
             try
             {
                 ChooseCurrency:
-                List<Choice> currenciesChoices = Choice.CreateChoices(Client.CurrencyClients);
+                var currenciesChoices = Choice.CreateChoices(Client.CurrencyClients);
                 if (Client.CurrencyClients.Count == 0)
                 {
                     CustomConsole.PrintStyleInfo("No currency");
@@ -322,8 +318,8 @@ namespace Bank
 
                 CustomConsole.Print("Select base currency : ");
                 CustomConsole.PrintAllChoices(currenciesChoices);
-                int currencyCount = Client.CurrencyClients.Count;
-                string stringBaseCurrency = Console.ReadLine();
+                var currencyCount = Client.CurrencyClients.Count;
+                var stringBaseCurrency = Console.ReadLine();
                 int baseIndex;
                 if (!int.TryParse(stringBaseCurrency, out baseIndex) || baseIndex < 1 ||
                     baseIndex > currencyCount)
@@ -332,12 +328,12 @@ namespace Bank
                     goto ChooseCurrency;
                 }
 
-                CurrencyClient baseCurrency = Client.CurrencyClients.ElementAt(baseIndex - 1);
+                var baseCurrency = Client.CurrencyClients.ElementAt(baseIndex - 1);
 
 
                 CustomConsole.Print("Select base currency : ");
                 CustomConsole.PrintAllChoices(currenciesChoices);
-                string stringTargetCurrency = Console.ReadLine();
+                var stringTargetCurrency = Console.ReadLine();
                 int targetIndex;
                 if (!int.TryParse(stringTargetCurrency, out targetIndex) || targetIndex < 1 ||
                     targetIndex > currencyCount)
@@ -346,11 +342,11 @@ namespace Bank
                     goto ChooseCurrency;
                 }
 
-                CurrencyClient targetCurrency = Client.CurrencyClients.ElementAt(targetIndex - 1);
+                var targetCurrency = Client.CurrencyClients.ElementAt(targetIndex - 1);
                 SelectAmount:
                 CustomConsole.PrintInfo("How much " + baseCurrency.Currency.Name + " do you want to exchange in " +
                                         targetCurrency.Currency.Name + " ? ");
-                string strAmount = Console.ReadLine();
+                var strAmount = Console.ReadLine();
                 int amount;
                 if (!int.TryParse(strAmount, out amount))
                 {
@@ -389,7 +385,7 @@ namespace Bank
                 goto ChooseClient;
             }
 
-            double amount = ChooseAmount();
+            var amount = ChooseAmount();
 
             return await Storage.DataAccess.TransfertMoney(Client, clients.Find(c => c.Guid == clientGuid), amount);
         }
@@ -405,8 +401,8 @@ namespace Bank
             try
             {
                 Console.Write("Your message : ");
-                string msg = Console.ReadLine();
-                return msg.Trim() == "" || Storage.DataAccess.AddMessage(new Message() {Content = msg, Client = Client});
+                var msg = Console.ReadLine();
+                return msg.Trim() == "" || Storage.DataAccess.AddMessage(new Message {Content = msg, Client = Client});
             }
             catch (Exception e)
             {
@@ -420,9 +416,9 @@ namespace Bank
         {
             try
             {
-                int secondsToWait = 5;
+                var secondsToWait = 5;
 
-                int currentLineCursor = Console.CursorTop;
+                var currentLineCursor = Console.CursorTop;
                 CustomConsole.PrintStyleInfo("Your pin : " + Client.Pin);
                 while (secondsToWait != 0)
                 {
@@ -431,7 +427,7 @@ namespace Bank
                     secondsToWait--;
                 }
 
-                for (int i = -1; i < 3; i++)
+                for (var i = -1; i < 3; i++)
                 {
                     Console.SetCursorPosition(0, Console.CursorTop - i);
                     Console.Write(new string(' ', Console.WindowWidth));

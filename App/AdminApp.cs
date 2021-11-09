@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection.PortableExecutable;
 using Bank.Models;
 using Bank.Utils;
 
@@ -126,8 +125,8 @@ namespace Bank
 
             var pin = new Random().Next(1000, 10000);
 
-            Client newClient = new Client {Lastname = lastname, Firstname = firstname, Pin = pin};
-            bool res = Storage.DataAccess.CreateClient(newClient);
+            var newClient = new Client {Lastname = lastname, Firstname = firstname, Pin = pin};
+            var res = Storage.DataAccess.CreateClient(newClient);
 
             if (res)
             {
@@ -167,20 +166,20 @@ namespace Bank
         {
             CustomConsole.PrintStyleInfo("Client found ! : " + c);
             CustomConsole.Print("Enter : ");
-            CustomConsole.PrintChoice(new Choice() {Key = "1", Message = " to delete"});
-            CustomConsole.PrintChoice(new Choice() {Key = "2", Message = " to update"});
+            CustomConsole.PrintChoice(new Choice {Key = "1", Message = " to delete"});
+            CustomConsole.PrintChoice(new Choice {Key = "2", Message = " to update"});
         }
 
         public bool UpdateClient(Client c)
         {
             CustomConsole.Print("Tap : ");
-            CustomConsole.PrintChoice(new Choice() {Key = "1", Message = "to unblock"});
-            CustomConsole.PrintChoice(new Choice() {Key = "2", Message = "to block"});
-            CustomConsole.PrintChoice(new Choice() {Key = "3", Message = "to change pin"});
-            CustomConsole.PrintChoice(new Choice() {Key = "4", Message = "to reset tries"});
-            CustomConsole.PrintChoice(new Choice()
+            CustomConsole.PrintChoice(new Choice {Key = "1", Message = "to unblock"});
+            CustomConsole.PrintChoice(new Choice {Key = "2", Message = "to block"});
+            CustomConsole.PrintChoice(new Choice {Key = "3", Message = "to change pin"});
+            CustomConsole.PrintChoice(new Choice {Key = "4", Message = "to reset tries"});
+            CustomConsole.PrintChoice(new Choice
                 {Key = "5", Message = "to update client informations (firstname and lastname)"});
-            CustomConsole.PrintChoice(new Choice() {Key = "6", Message = "to add currencies to a client"});
+            CustomConsole.PrintChoice(new Choice {Key = "6", Message = "to add currencies to a client"});
             var key = Console.ReadLine();
             switch (key)
             {
@@ -218,19 +217,18 @@ namespace Bank
 
                     return Storage.DataAccess.UpdateClient(c);
                 case "6":
-                    ChooseCurrency:
                     Console.WriteLine(
                         "Enter main currency (example : EUR , USD ... ) (leave empty if you don't want update ) : ");
-                    List<Currency> allCurrencies = Storage.DataAccess.GetAllCurrencies();
-                    string currencyString = Console.ReadLine();
+                    var allCurrencies = Storage.DataAccess.GetAllCurrencies();
+                    var currencyString = Console.ReadLine();
 
-                    List<CurrencyClient> currencies = new List<CurrencyClient>();
+                    var currencies = new List<CurrencyClient>();
 
 
-                    Currency mainCurrency = allCurrencies.Find(c => c.Name == currencyString);
+                    var mainCurrency = allCurrencies.Find(c => c.Name == currencyString);
 
                     if (mainCurrency != null)
-                        currencies.Add(new CurrencyClient()
+                        currencies.Add(new CurrencyClient
                         {
                             Client = c,
                             Amount = 0,
@@ -238,14 +236,14 @@ namespace Bank
                         });
 
                     Console.WriteLine("Enter all other currencies separate by virgule (Example : EUR;USD;ZWL ... ) : ");
-                    string currenciesString = Console.ReadLine();
-                    string[] listStringCurrencies = currenciesString.Split(";");
-                    foreach (string str in listStringCurrencies)
+                    var currenciesString = Console.ReadLine();
+                    var listStringCurrencies = currenciesString.Split(";");
+                    foreach (var str in listStringCurrencies)
                     {
-                        string strCurrency = str.Trim();
-                        Currency currency = allCurrencies.Find(cu => cu.Name == strCurrency);
+                        var strCurrency = str.Trim();
+                        var currency = allCurrencies.Find(cu => cu.Name == strCurrency);
                         if (currency != null)
-                            currencies.Add(new CurrencyClient()
+                            currencies.Add(new CurrencyClient
                             {
                                 Client = c,
                                 Amount = 0,
@@ -273,7 +271,7 @@ namespace Bank
                     try
                     {
                         var transactions = Storage.DataAccess.GetAllTransactions();
-                        string msg = "";
+                        var msg = "";
                         foreach (var transaction in transactions) msg += "" + transaction + "\n";
                         if (transactions.Count == 0) msg = "No transaction";
                         CustomConsole.PrintStyleInfo(msg);
@@ -319,8 +317,8 @@ namespace Bank
             try
             {
                 var clients = Storage.DataAccess.GetAll();
-                string header = "CLIENTS  NAMES : ";
-                string details = "DETAILS : \n\n";
+                var header = "CLIENTS  NAMES : ";
+                var details = "DETAILS : \n\n";
                 foreach (var client in clients)
                 {
                     header += client.Firstname + " " + client.Lastname + " , ";
@@ -341,12 +339,9 @@ namespace Bank
         {
             try
             {
-                List<Message> messages = Storage.DataAccess.getMessages();
-                string res = "";
-                foreach (var message in messages)
-                {
-                    res += message;
-                }
+                var messages = Storage.DataAccess.getMessages();
+                var res = "";
+                foreach (var message in messages) res += message;
 
                 CustomConsole.PrintStyleInfo(res);
                 return true;

@@ -1,17 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Text.Json.Serialization;
-using Bank.Utils;
 
 namespace Bank.Models
 {
     [Table("Client")]
     public class Client
     {
-
         private int _tries;
 
         public Client()
@@ -43,14 +39,12 @@ namespace Bank.Models
 
         public override string ToString()
         {
-            string currencies = "\n";
+            var currencies = "\n";
             foreach (var currencyClient in CurrencyClients)
-            {
-                currencies += "                   - "+currencyClient+ " \n";
-            }
+                currencies += "                   - " + currencyClient + " \n";
 
             currencies = currencies == "\n" ? " no currency \n" : currencies;
-            
+
             return "Client n°" + Guid + " \n" +
                    "       Firstname : " + Firstname + " \n" +
                    "       LastName : " + Lastname + " \n" +
@@ -69,10 +63,15 @@ namespace Bank.Models
             CurrencyClients = c.CurrencyClients.Count == 0 ? CurrencyClients : c.CurrencyClients;
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             if (obj == null || !(obj is Client)) return false;
             return Guid == ((Client) obj).Guid;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
 
         public void unBlockedAndReset()

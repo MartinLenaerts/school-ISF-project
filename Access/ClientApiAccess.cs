@@ -14,7 +14,7 @@ namespace Bank.Access
 
         private string GetUrl()
         {
-            return "https://v6.exchangerate-api.com/v6/"+_apiKey+"/";
+            return "https://v6.exchangerate-api.com/v6/" + _apiKey + "/";
         }
 
 
@@ -30,7 +30,8 @@ namespace Bank.Access
             catch (Exception e)
             {
                 CustomConsole.Print(e.Message);
-                CustomConsole.PrintError("An error occured, check your internet connection and check your api key in the environment file");
+                CustomConsole.PrintError(
+                    "An error occured, check your internet connection and check your api key in the environment file");
                 throw;
             }
         }

@@ -29,10 +29,10 @@ namespace Bank.Models
         {
             return "Client n°" + ClientId + " have " + Amount + " " + Currency.Name;
         }
-        
+
         public override string ToString()
         {
-            return  Amount + " " + Currency.Name;
+            return Amount + " " + Currency.Name;
         }
 
         public void Merge(CurrencyClient c)
@@ -41,11 +41,16 @@ namespace Bank.Models
             Amount = c.Amount == -1 ? Amount : c.Amount;
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             if (obj == null || !(obj is CurrencyClient)) return false;
             var cc = (CurrencyClient) obj;
             return ClientId == cc.ClientId && ClientId == cc.ClientId;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

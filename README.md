@@ -1,6 +1,7 @@
 # System integration: fundamentals
 
 ## Table of contents
+
 - [Project desciption](#project-description)
 - [Project Setup](#project-setup)
     - [Create Migration](#create-migration)
@@ -15,7 +16,7 @@
 
 ___
 
-## Project description 
+## Project description
 
 > #### This  project is a Bank application
 > There are two types of users: administrators and clients.
@@ -25,9 +26,8 @@ ___
 >
 > To connect, administrators have a predefined username and password and clients have a guid and a pin code.
 > (see [Important information](#important-informations-))
-> 
-> To know more informations you can read the [subject](https://github.com/MartinLenaerts/school-ISF-project/blob/master/subject.pdf) of this project 
-
+>
+> To know more informations you can read the [subject](https://github.com/MartinLenaerts/school-ISF-project/blob/master/subject.pdf) of this project
 
 ## Project setup
 
@@ -45,12 +45,11 @@ dotnet ef database update
 
 ### Create environnment variables
 
->create an ``` .env.local ``` with  [``` .env ```](https://github.com/MartinLenaerts/school-ISF-project/blob/master/.env) in example
+> create an ``` .env.local ``` with  [``` .env ```](https://github.com/MartinLenaerts/school-ISF-project/blob/master/.env) in example
 >
 >And set this row ``` API_KEY=xxx ```
-> 
+>
 > If you haven't api key you can create an account here : [https://app.exchangerate-api.com/sign-up](https://app.exchangerate-api.com/sign-up)
-
 
 ### Run
 
@@ -62,7 +61,7 @@ ___
 
 ## First launch !
 
->If it's the first start of program you can execute the seed to insert data in database.
+> If it's the first start of program you can execute the seed to insert data in database.
 >
 >so you can tap ``` y ``` to this question :
 >
@@ -74,7 +73,7 @@ ___
 
 ### To log into the admin account :
 
->username : ``` admin ```
+> username : ``` admin ```
 >
 >password : ``` admin ```
 
