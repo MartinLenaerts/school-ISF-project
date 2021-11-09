@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Bank.Models;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace Bank.Utils

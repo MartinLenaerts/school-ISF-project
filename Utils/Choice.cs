@@ -16,12 +16,27 @@ namespace Bank.Utils
             var count = 1;
             foreach (var currencyClient in currencyClients)
             {
-                choices.Add(new Choice {Key = "" + count, Message = currencyClient.Currency.Name});
+                choices.Add(new Choice {Key = "" + currencyClient.CurrencyClientId, Message = currencyClient.Currency.Name});
                 count++;
             }
 
             return choices;
         }
+        
+        public static List<Choice> CreateChoices(ICollection<Currency> currencies)
+        {
+            var choices = new List<Choice>();
+
+            var count = 1;
+            foreach (var currency in currencies)
+            {
+                choices.Add(new Choice {Key = "" + currency.Id, Message = currency.Name});
+                count++;
+            }
+
+            return choices;
+        }
+        
 
         public static List<Choice> CreateChoices(ICollection<Client> clients)
         {

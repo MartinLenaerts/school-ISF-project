@@ -125,6 +125,7 @@ namespace Bank
             if (lastname == "" || firstname == "") return false;
 
             var pin = new Random().Next(1000, 10000);
+            
             Client newClient = new Client {Lastname = lastname, Firstname = firstname, Pin = pin};
             bool res = Storage.DataAccess.CreateClient(newClient);
             
@@ -177,6 +178,7 @@ namespace Bank
             CustomConsole.PrintChoice(new Choice(){Key="3",Message = "to change pin"});
             CustomConsole.PrintChoice(new Choice(){Key="4",Message = "to reset tries"});
             CustomConsole.PrintChoice(new Choice(){Key="5",Message = "to update client informations (firstname and lastname)"});
+            CustomConsole.PrintChoice(new Choice(){Key="6",Message = "to add currencies to a client"});
             var key = Console.ReadLine();
             switch (key)
             {
@@ -213,6 +215,42 @@ namespace Bank
                     if (firstname != "") c.Firstname = firstname;
 
                     return Storage.DataAccess.UpdateClient(c);
+                case "6":
+                    ChooseCurrency:
+                    Console.WriteLine("Enter main currency (example : EUR , USD ... ) (leave empty if you don't want update ) : ");
+                    List<Currency> allCurrencies = Storage.DataAccess.GetAllCurrencies();
+                    string currencyString = Console.ReadLine();
+                    
+                    List<CurrencyClient> currencies = new List<CurrencyClient>();
+            
+                    
+                    Currency mainCurrency = allCurrencies.Find(c => c.Name == currencyString);
+            
+                    if(mainCurrency!= null) currencies.Add(new CurrencyClient()
+                    {
+                        Client = c,
+                        Amount = 0,
+                        Currency = mainCurrency
+                            
+                    });
+
+                    Console.WriteLine("Enter all other currencies separate by virgule (Example : EUR;USD;ZWL ... ) : ");
+                    string currenciesString = Console.ReadLine();
+                    string[] listStringCurrencies = currenciesString.Split(";");
+                    foreach (string str in listStringCurrencies)
+                    {
+                        string strCurrency = str.Trim();
+                        Currency currency = allCurrencies.Find(cu => cu.Name == strCurrency);
+                        if(currency != null) currencies.Add(new CurrencyClient() {
+                            Client = c,
+                            Amount = 0,
+                            Currency = currency
+                            
+                        });
+                    }
+                    c.CurrencyClients = currencies;
+                    return  Storage.DataAccess.UpdateClient(c);
+                    
                 default:
                     return false;
             }

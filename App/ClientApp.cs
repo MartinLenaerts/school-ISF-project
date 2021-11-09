@@ -40,12 +40,12 @@ namespace Bank
                         CustomConsole.PrintStyleInfo(Client.ToString());
                         goto BeginClient;
                     case "2": // total amount in preferred currency
-                        if (!ViewTotalAmount()) // Ask Credentials
+                        if (!ViewTotalAmount()) // view total amount
                             throw new Exception("\n An error occured");
 
                         goto BeginClient;
                     case "3": // total all amounts
-                        if (!ViewTotatAllAmounts()) // Ask Credentials
+                        if (!ViewTotatAllAmounts()) // View total all amounts
                             throw new Exception("\n An error occured");
 
                         goto BeginClient;
@@ -57,6 +57,7 @@ namespace Bank
                             goto RetrieveMoney;
                         }
 
+                        CustomConsole.PrintSuccess("Operation submitted ! ");
                         goto BeginClient;
                     case "5": // add money from currency
                         AddMoney:
@@ -66,6 +67,7 @@ namespace Bank
                             goto AddMoney;
                         }
 
+                        CustomConsole.PrintSuccess("Operation submitted ! ");
                         goto BeginClient;
                     case "6": // exchange money
                         ExchangeMoney:
@@ -93,6 +95,8 @@ namespace Bank
                             goto ChangePin;
                         }
 
+                        ShowPin();
+
                         goto BeginClient;
                     case "9": // Leave message for admin
                         LeaveMsg:
@@ -101,13 +105,15 @@ namespace Bank
                             CustomConsole.PrintError("\n An eroor occured");
                             goto LeaveMsg;
                         }
+                        
 
-                        goto BeginClient; 
+                        goto BeginClient;
                     case "10": // Show Pin
                         if (!ShowPin())
                         {
                             CustomConsole.PrintError("\n An eroor occured");
                         }
+
                         goto BeginClient;
                     case "d": // Disconnect
                         Client = null;
@@ -226,38 +232,10 @@ namespace Bank
                     return true;
                 }
 
-                ChooseCurrency:
-                Console.Write("Choose the currency : ");
-                var index = 1;
-                foreach (var currencyC in currenciesClient)
-                {
-                    CustomConsole.Print(index + " : " + currencyC.Currency.Name);
-                    index++;
-                }
+                CurrencyClient currencyClient = ChooseCurrency(currenciesClient);
 
-                var stringCurrency = Console.ReadLine();
-                int currency;
-                if (!int.TryParse(stringCurrency, out currency) || currency < 1 || currency > index)
-                {
-                    CustomConsole.PrintError("Wrong key ! ");
-                    goto ChooseCurrency;
-                }
-
-                CustomConsole.Print("");
-                var cc = currenciesClient.ElementAt(currency);
-                TapAmount:
-                Console.Write("Tap the amount : ");
-                var stringAmount = Console.ReadLine();
-                double amount;
-                if (!double.TryParse(stringAmount, out amount) || amount < 1 || cc.Amount < amount)
-                {
-                    CustomConsole.PrintError("Wrong amount ! ");
-                    goto TapAmount;
-                }
-
-                cc.Amount -= amount;
-                Storage.DataAccess.UpdateCurrencyClient(cc);
-                return true;
+                currencyClient.Amount -= ChooseAmount();
+                return Storage.DataAccess.UpdateCurrencyClient(currencyClient);
             }
             catch (Exception e)
             {
@@ -277,37 +255,14 @@ namespace Bank
                     return true;
                 }
 
-                ChooseCurrency:
-                Console.Write("Choose the currency : ");
-                var index = 1;
-                foreach (var currencyC in currenciesClient)
-                {
-                    CustomConsole.Print(index + " : " + currencyC.Currency.Name);
-                    index++;
-                }
+                CurrencyClient currency = ChooseCurrency(currenciesClient);
 
-                var stringCurrency = Console.ReadLine();
-                int currency;
-                if (!int.TryParse(stringCurrency, out currency) || currency < 1 || currency > index)
-                {
-                    Console.WriteLine("Wrong key ! ");
-                    goto ChooseCurrency;
-                }
 
-                CustomConsole.Print("");
-                var cc = currenciesClient.ElementAt(currency);
-                TapAmount:
-                Console.Write("Tap the amount : ");
-                var stringAmount = Console.ReadLine();
-                double amount;
-                if (!double.TryParse(stringAmount, out amount) || amount < 1)
-                {
-                    CustomConsole.PrintError("Wrong amount ! ");
-                    goto TapAmount;
-                }
+                Console.WriteLine("old :" + currency);
+                currency.Amount += ChooseAmount();
 
-                cc.Amount += amount;
-                Storage.DataAccess.UpdateCurrencyClient(cc);
+                Console.WriteLine("new :" + currency);
+                Storage.DataAccess.UpdateCurrencyClient(currency);
                 return true;
             }
             catch (Exception e)
@@ -315,6 +270,42 @@ namespace Bank
                 CustomConsole.PrintError(e.Message);
                 return false;
             }
+        }
+
+        private CurrencyClient ChooseCurrency(List<CurrencyClient> currenciesClient)
+        {
+            ChooseCurrency:
+            CustomConsole.Print("Choose the currency : ");
+            CustomConsole.PrintAllChoices(Choice.CreateChoices(currenciesClient));
+            var stringCurrency = Console.ReadLine();
+            int currencyIndex;
+            if (!int.TryParse(stringCurrency, out currencyIndex) ||
+                currenciesClient.Find(c => c.CurrencyClientId == currencyIndex) == null)
+            {
+                Console.WriteLine("Wrong key ! ");
+                goto ChooseCurrency;
+            }
+
+            CurrencyClient currency = currenciesClient.Find(c => c.CurrencyClientId == currencyIndex);
+
+            CustomConsole.Print("");
+            return currency;
+        }
+
+
+        private double ChooseAmount()
+        {
+            TapAmount:
+            Console.Write("Tap the amount : ");
+            var stringAmount = Console.ReadLine();
+            double amount;
+            if (!double.TryParse(stringAmount, out amount) || amount < 1)
+            {
+                CustomConsole.PrintError("Wrong amount ! ");
+                goto TapAmount;
+            }
+
+            return amount;
         }
 
         public async Task<bool> ExchangeMoney()
@@ -328,6 +319,7 @@ namespace Bank
                     CustomConsole.PrintStyleInfo("No currency");
                     return true;
                 }
+
                 CustomConsole.Print("Select base currency : ");
                 CustomConsole.PrintAllChoices(currenciesChoices);
                 int currencyCount = Client.CurrencyClients.Count;
@@ -384,10 +376,11 @@ namespace Bank
                 CustomConsole.PrintStyleInfo("No currency");
                 return true;
             }
+
             CustomConsole.PrintInfo("Please choose client to transfert money : ");
             var clients = Storage.DataAccess.GetAll();
             clients.Remove(Client);
-            Choice.CreateChoices(clients);
+            CustomConsole.PrintAllChoices(Choice.CreateChoices(clients));
             var stringClient = Console.ReadLine();
             int clientGuid;
             if (!int.TryParse(stringClient, out clientGuid) || !clients.Exists(c => c.Guid == clientGuid))
@@ -396,53 +389,48 @@ namespace Bank
                 goto ChooseClient;
             }
 
-            SelectAmount:
-            var strAmount = Console.ReadLine();
-            int amount;
-            if (!int.TryParse(strAmount, out amount))
-            {
-                CustomConsole.PrintError("Wrong amount ! ");
-                goto SelectAmount;
-            }
+            double amount = ChooseAmount();
 
             return await Storage.DataAccess.TransfertMoney(Client, clients.Find(c => c.Guid == clientGuid), amount);
         }
 
         public bool ChangePin()
         {
-            throw new NotImplementedException();
+            Client.Pin = new Random().Next(1000, 10000);
+            return Storage.DataAccess.UpdateClient(Client);
         }
 
         public bool LeaveMsg()
         {
             throw new NotImplementedException();
         }
-        
-        
+
+
         public bool ShowPin()
         {
             try
             {
-                
                 int secondsToWait = 5;
-                
+
                 int currentLineCursor = Console.CursorTop;
                 CustomConsole.PrintStyleInfo("Your pin : " + Client.Pin);
                 while (secondsToWait != 0)
                 {
-                    CustomConsole.PrintInfo(""+secondsToWait+" . ",false);
+                    CustomConsole.PrintInfo("" + secondsToWait + " . ", false);
                     Thread.Sleep(1000);
                     secondsToWait--;
                 }
+
                 for (int i = -1; i < 3; i++)
                 {
-                    Console.SetCursorPosition(0, Console.CursorTop-i);
+                    Console.SetCursorPosition(0, Console.CursorTop - i);
                     Console.Write(new string(' ', Console.WindowWidth));
-                    Console.SetCursorPosition(0, currentLineCursor-1);
+                    Console.SetCursorPosition(0, currentLineCursor - 1);
                 }
+
                 return true;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 CustomConsole.PrintError(e.Message);
                 return false;

@@ -219,6 +219,13 @@ namespace Bank.Access
                 AddCurrencyToCurrenciesClients(context.CurrenciesClients.FindAll(cc => cc.ClientId == guid), context);
             return currenciesClient;
         }
+        
+        public List<Currency> GetAllCurrencies()
+        {
+            var context = GetContext();
+            var currenciesClient = context.Currencies;
+            return currenciesClient;
+        }
 
         public ClientJsonContext GetContext()
         {

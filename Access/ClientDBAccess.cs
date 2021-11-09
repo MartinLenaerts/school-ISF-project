@@ -202,6 +202,11 @@ namespace Bank.Access
         {
             return Context.CurrenciesClients.Where(cc => cc.ClientId == guid).ToList();
         }
+        
+        public List<Currency> GetAllCurrencies()
+        {
+            return Context.Currencies.ToList();
+        }
 
 
         public int getLastId()

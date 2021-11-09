@@ -29,7 +29,8 @@ namespace Bank.Access
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                CustomConsole.Print(e.Message);
+                CustomConsole.PrintError("An error occured, check your internet connection and check your api key in the environment file");
                 throw;
             }
         }

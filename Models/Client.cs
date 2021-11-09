@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.Json.Serialization;
+using Bank.Utils;
 
 namespace Bank.Models
 {
@@ -64,6 +66,7 @@ namespace Bank.Models
             Pin = c.Pin == 0 ? Pin : c.Pin;
             Blocked = c.Blocked;
             Tries = c.Tries;
+            CurrencyClients = c.CurrencyClients.Count == 0 ? CurrencyClients : c.CurrencyClients;
         }
 
         public override bool Equals(object? obj)
