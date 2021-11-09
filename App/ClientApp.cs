@@ -105,8 +105,8 @@ namespace Bank
                             CustomConsole.PrintError("\n An eroor occured");
                             goto LeaveMsg;
                         }
-                        
 
+                        CustomConsole.PrintSuccess("Message sended ! ");
                         goto BeginClient;
                     case "10": // Show Pin
                         if (!ShowPin())
@@ -402,7 +402,17 @@ namespace Bank
 
         public bool LeaveMsg()
         {
-            throw new NotImplementedException();
+            try
+            {
+                Console.Write("Your message : ");
+                string msg = Console.ReadLine();
+                return msg.Trim() == "" || Storage.DataAccess.AddMessage(new Message() {Content = msg, Client = Client});
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
         }
 
 

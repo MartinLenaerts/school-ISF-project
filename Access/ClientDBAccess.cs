@@ -171,14 +171,14 @@ namespace Bank.Access
         {
             try
             {
-
                 var ccSender = Context.CurrenciesClients.First(c =>
                     c.ClientId == sender.Guid && c.HasMain);
                 var ccReceiver = Context.CurrenciesClients.First(c =>
                     c.ClientId == receiver.Guid && c.HasMain);
 
                 double rate = 1;
-                if(!ccSender.Currency.Equals(ccReceiver.Currency)) rate = await ApiAccess.GetPair(ccSender.Currency.Name, ccReceiver.Currency.Name);
+                if (!ccSender.Currency.Equals(ccReceiver.Currency))
+                    rate = await ApiAccess.GetPair(ccSender.Currency.Name, ccReceiver.Currency.Name);
                 if (ccSender.Amount < amount) return false;
                 ccSender.Amount -= amount;
                 ccReceiver.Amount += amount * rate;
@@ -202,7 +202,7 @@ namespace Bank.Access
         {
             return Context.CurrenciesClients.Where(cc => cc.ClientId == guid).ToList();
         }
-        
+
         public List<Currency> GetAllCurrencies()
         {
             return Context.Currencies.ToList();
@@ -211,7 +211,27 @@ namespace Bank.Access
 
         public int getLastId()
         {
-            return Context.Clients.OrderBy(c=>c.Guid).Last().Guid;
+            return Context.Clients.OrderBy(c => c.Guid).Last().Guid;
+        }
+
+        public List<Message> getMessages()
+        {
+            return Context.Messages.OrderBy(c => c.Date).ToList();
+        }
+
+        public bool AddMessage(Message m)
+        {
+            try
+            {
+                Context.Messages.Add(m);
+                Context.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
         }
     }
 }

@@ -29,5 +29,9 @@ namespace Bank.Access
 
         public int getLastId();
         List<Currency> GetAllCurrencies();
+
+        public List<Message> getMessages();
+
+        public bool AddMessage(Message m);
     }
 }

@@ -10,6 +10,8 @@ namespace Bank.Context
         public DbSet<Currency> Currencies { get; set; }
         public DbSet<CurrencyClient> CurrenciesClients { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        
+        public DbSet<Message> Messages { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

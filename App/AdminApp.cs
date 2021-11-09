@@ -25,12 +25,13 @@ namespace Bank
                 CustomConsole.PrintError("\n Username ou password incorrect");
                 goto AskAdminCredentials;
             }
+
             Console.Clear();
             Admin = new Admin();
             BeginAdmin:
             PrintWelcomeMessage();
             var key = Console.ReadLine();
-            switch (key)
+            switch (key.ToLower())
             {
                 case "1": // Create Client
                     createClient:
@@ -63,17 +64,15 @@ namespace Bank
                     if (!ViewAllClients()) CustomConsole.PrintError("Une erreur s'est produite");
 
                     goto BeginAdmin;
+                case "5": // View all clients
+                    if (!ViewMessages()) CustomConsole.PrintError("Une erreur s'est produite");
+
+                    goto BeginAdmin;
                 case "d": // Disconnect
                     Admin = null;
                     CustomConsole.PrintSuccess("Vous avez bien été déconnecté \n");
                     return false;
-                case "D": // Disconnect
-                    Admin = null;
-                    CustomConsole.PrintSuccess("Vous avez bien été déconnecté \n");
-                    return false;
                 case "q": // Quit
-                    return true;
-                case "Q": // Quit
                     return true;
                 default:
                     goto BeginAdmin;
@@ -92,6 +91,7 @@ namespace Bank
                 new() {Key = "2", Message = "to manage client"},
                 new() {Key = "3", Message = "to verify user transactions"},
                 new() {Key = "4", Message = "to view a list of all clients"},
+                new() {Key = "5", Message = "to view messages"},
                 new() {Key = "D", Message = "to disconnect"},
                 new() {Key = "Q", Message = "to quit"}
             };
@@ -125,15 +125,16 @@ namespace Bank
             if (lastname == "" || firstname == "") return false;
 
             var pin = new Random().Next(1000, 10000);
-            
+
             Client newClient = new Client {Lastname = lastname, Firstname = firstname, Pin = pin};
             bool res = Storage.DataAccess.CreateClient(newClient);
-            
+
             if (res)
             {
                 Console.Clear();
                 CustomConsole.PrintSuccess("Client has been created ! ");
-                CustomConsole.PrintStyleInfo("Please give this pin to the new client n° "+Storage.DataAccess.getLastId()+" : " + newClient.Pin);
+                CustomConsole.PrintStyleInfo("Please give this pin to the new client n° " +
+                                             Storage.DataAccess.getLastId() + " : " + newClient.Pin);
             }
 
             return res;
@@ -142,7 +143,7 @@ namespace Bank
         public bool ManageClient()
         {
             if (Admin is null) return false;
-            CustomConsole.Print("Please enter a client guid : ",false);
+            CustomConsole.Print("Please enter a client guid : ", false);
             var guid = Console.ReadLine();
             if (guid == "") return false;
             try
@@ -166,19 +167,20 @@ namespace Bank
         {
             CustomConsole.PrintStyleInfo("Client found ! : " + c);
             CustomConsole.Print("Enter : ");
-            CustomConsole.PrintChoice(new Choice(){Key = "1", Message=" to delete"});
-            CustomConsole.PrintChoice(new Choice(){Key = "2", Message=" to update"});
+            CustomConsole.PrintChoice(new Choice() {Key = "1", Message = " to delete"});
+            CustomConsole.PrintChoice(new Choice() {Key = "2", Message = " to update"});
         }
 
         public bool UpdateClient(Client c)
         {
             CustomConsole.Print("Tap : ");
-            CustomConsole.PrintChoice(new Choice(){Key="1",Message = "to unblock"});
-            CustomConsole.PrintChoice(new Choice(){Key="2",Message = "to block"});
-            CustomConsole.PrintChoice(new Choice(){Key="3",Message = "to change pin"});
-            CustomConsole.PrintChoice(new Choice(){Key="4",Message = "to reset tries"});
-            CustomConsole.PrintChoice(new Choice(){Key="5",Message = "to update client informations (firstname and lastname)"});
-            CustomConsole.PrintChoice(new Choice(){Key="6",Message = "to add currencies to a client"});
+            CustomConsole.PrintChoice(new Choice() {Key = "1", Message = "to unblock"});
+            CustomConsole.PrintChoice(new Choice() {Key = "2", Message = "to block"});
+            CustomConsole.PrintChoice(new Choice() {Key = "3", Message = "to change pin"});
+            CustomConsole.PrintChoice(new Choice() {Key = "4", Message = "to reset tries"});
+            CustomConsole.PrintChoice(new Choice()
+                {Key = "5", Message = "to update client informations (firstname and lastname)"});
+            CustomConsole.PrintChoice(new Choice() {Key = "6", Message = "to add currencies to a client"});
             var key = Console.ReadLine();
             switch (key)
             {
@@ -217,22 +219,23 @@ namespace Bank
                     return Storage.DataAccess.UpdateClient(c);
                 case "6":
                     ChooseCurrency:
-                    Console.WriteLine("Enter main currency (example : EUR , USD ... ) (leave empty if you don't want update ) : ");
+                    Console.WriteLine(
+                        "Enter main currency (example : EUR , USD ... ) (leave empty if you don't want update ) : ");
                     List<Currency> allCurrencies = Storage.DataAccess.GetAllCurrencies();
                     string currencyString = Console.ReadLine();
-                    
+
                     List<CurrencyClient> currencies = new List<CurrencyClient>();
-            
-                    
+
+
                     Currency mainCurrency = allCurrencies.Find(c => c.Name == currencyString);
-            
-                    if(mainCurrency!= null) currencies.Add(new CurrencyClient()
-                    {
-                        Client = c,
-                        Amount = 0,
-                        Currency = mainCurrency
-                            
-                    });
+
+                    if (mainCurrency != null)
+                        currencies.Add(new CurrencyClient()
+                        {
+                            Client = c,
+                            Amount = 0,
+                            Currency = mainCurrency
+                        });
 
                     Console.WriteLine("Enter all other currencies separate by virgule (Example : EUR;USD;ZWL ... ) : ");
                     string currenciesString = Console.ReadLine();
@@ -241,16 +244,18 @@ namespace Bank
                     {
                         string strCurrency = str.Trim();
                         Currency currency = allCurrencies.Find(cu => cu.Name == strCurrency);
-                        if(currency != null) currencies.Add(new CurrencyClient() {
-                            Client = c,
-                            Amount = 0,
-                            Currency = currency
-                            
-                        });
+                        if (currency != null)
+                            currencies.Add(new CurrencyClient()
+                            {
+                                Client = c,
+                                Amount = 0,
+                                Currency = currency
+                            });
                     }
+
                     c.CurrencyClients = currencies;
-                    return  Storage.DataAccess.UpdateClient(c);
-                    
+                    return Storage.DataAccess.UpdateClient(c);
+
                 default:
                     return false;
             }
@@ -319,10 +324,31 @@ namespace Bank
                 foreach (var client in clients)
                 {
                     header += client.Firstname + " " + client.Lastname + " , ";
-                    details += client+"\n";
+                    details += client + "\n";
                 }
 
                 CustomConsole.PrintStyleInfo(header.Remove(header.Length - 2) + "\n\n" + details);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
+        public bool ViewMessages()
+        {
+            try
+            {
+                List<Message> messages = Storage.DataAccess.getMessages();
+                string res = "";
+                foreach (var message in messages)
+                {
+                    res += message;
+                }
+
+                CustomConsole.PrintStyleInfo(res);
                 return true;
             }
             catch (Exception e)

@@ -48,6 +48,7 @@ namespace Bank.Access
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -326,6 +327,27 @@ namespace Bank.Access
             }
 
             return result;
+        }
+        
+        public List<Message> getMessages()
+        {
+            var context = GetContext();
+            return context.Messages.OrderBy(c=>c.Date).ToList();
+        }
+        
+        public bool AddMessage(Message m)
+        {
+            try
+            {
+                var context = GetContext();
+                context.Messages.Add(m);
+                return PushContext(context);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
         }
     }
 }
